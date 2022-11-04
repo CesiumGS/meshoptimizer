@@ -20,7 +20,7 @@ struct BasisSettings
 	int etc1s_l;
 	int etc1s_q;
 	int uastc_l;
-	float uastc_q;
+	real_t uastc_q;
 };
 
 static const BasisSettings kBasisSettings[10] = {

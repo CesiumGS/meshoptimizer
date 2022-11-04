@@ -8,19 +8,19 @@
 
 #include "../src/meshoptimizer.h"
 
-static float inverseTranspose(float* result, const float* transform)
+static real_t inverseTranspose(real_t* result, const real_t* transform)
 {
-	float m[4][4] = {};
-	memcpy(m, transform, 16 * sizeof(float));
+	real_t m[4][4] = {};
+	memcpy(m, transform, 16 * sizeof(real_t));
 
-	float det =
+	real_t det =
 	    m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2]) -
 	    m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
 	    m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 
-	float invdet = (det == 0.f) ? 0.f : 1.f / det;
+	real_t invdet = (det == 0.f) ? 0.f : 1.f / det;
 
-	float r[4][4] = {};
+	real_t r[4][4] = {};
 
 	r[0][0] = (m[1][1] * m[2][2] - m[2][1] * m[1][2]) * invdet;
 	r[1][0] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) * invdet;
@@ -34,30 +34,30 @@ static float inverseTranspose(float* result, const float* transform)
 
 	r[3][3] = 1.f;
 
-	memcpy(result, r, 16 * sizeof(float));
+	memcpy(result, r, 16 * sizeof(real_t));
 
 	return det;
 }
 
-static void transformPosition(float* res, const float* ptr, const float* transform)
+static void transformPosition(real_t* res, const real_t* ptr, const real_t* transform)
 {
-	float x = ptr[0] * transform[0] + ptr[1] * transform[4] + ptr[2] * transform[8] + transform[12];
-	float y = ptr[0] * transform[1] + ptr[1] * transform[5] + ptr[2] * transform[9] + transform[13];
-	float z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10] + transform[14];
+	real_t x = ptr[0] * transform[0] + ptr[1] * transform[4] + ptr[2] * transform[8] + transform[12];
+	real_t y = ptr[0] * transform[1] + ptr[1] * transform[5] + ptr[2] * transform[9] + transform[13];
+	real_t z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10] + transform[14];
 
 	res[0] = x;
 	res[1] = y;
 	res[2] = z;
 }
 
-static void transformNormal(float* res, const float* ptr, const float* transform)
+static void transformNormal(real_t* res, const real_t* ptr, const real_t* transform)
 {
-	float x = ptr[0] * transform[0] + ptr[1] * transform[4] + ptr[2] * transform[8];
-	float y = ptr[0] * transform[1] + ptr[1] * transform[5] + ptr[2] * transform[9];
-	float z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10];
+	real_t x = ptr[0] * transform[0] + ptr[1] * transform[4] + ptr[2] * transform[8];
+	real_t y = ptr[0] * transform[1] + ptr[1] * transform[5] + ptr[2] * transform[9];
+	real_t z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10];
 
-	float l = sqrtf(x * x + y * y + z * z);
-	float s = (l == 0.f) ? 0.f : 1 / l;
+	real_t l = std::sqrt(x * x + y * y + z * z);
+	real_t s = (l == 0.f) ? 0.f : 1 / l;
 
 	res[0] = x * s;
 	res[1] = y * s;
@@ -70,11 +70,11 @@ static void transformMesh(Mesh& target, const Mesh& mesh, const cgltf_node* node
 	assert(target.streams.size() == mesh.streams.size());
 	assert(target.indices.size() == mesh.indices.size());
 
-	float transform[16];
+	real_t transform[16];
 	cgltf_node_transform_world(node, transform);
 
-	float transforminvt[16];
-	float det = inverseTranspose(transforminvt, transform);
+	real_t transforminvt[16];
+	real_t det = inverseTranspose(transforminvt, transform);
 
 	for (size_t si = 0; si < mesh.streams.size(); ++si)
 	{
@@ -249,7 +249,7 @@ static void mergeMeshes(Mesh& target, const Mesh& mesh)
 	size_t index_count = mesh.indices.size();
 
 	for (size_t i = 0; i < index_count; ++i)
-		target.indices[index_offset + i] = unsigned(vertex_offset + mesh.indices[i]);
+		target.indices[index_offset + i] = datatype_t(vertex_offset + mesh.indices[i]);
 }
 
 void mergeMeshInstances(Mesh& mesh)
@@ -358,7 +358,7 @@ void filterEmptyMeshes(std::vector<Mesh>& meshes)
 		std::vector<Stream> streams;
 		streams.swap(mesh.streams);
 
-		std::vector<unsigned int> indices;
+		std::vector<datatype_t> indices;
 		indices.swap(mesh.indices);
 
 		meshes[write] = mesh;
@@ -373,7 +373,7 @@ void filterEmptyMeshes(std::vector<Mesh>& meshes)
 
 static bool hasColors(const std::vector<Attr>& data)
 {
-	const float threshold = 0.99f;
+	const real_t threshold = 0.99f;
 
 	for (size_t i = 0; i < data.size(); ++i)
 	{
@@ -388,13 +388,13 @@ static bool hasColors(const std::vector<Attr>& data)
 
 static bool hasDeltas(const std::vector<Attr>& data)
 {
-	const float threshold = 0.01f;
+	const real_t threshold = 0.01f;
 
 	for (size_t i = 0; i < data.size(); ++i)
 	{
 		const Attr& a = data[i];
 
-		if (fabsf(a.f[0]) > threshold || fabsf(a.f[1]) > threshold || fabsf(a.f[2]) > threshold)
+		if (std::abs(a.f[0]) > threshold || std::abs(a.f[1]) > threshold || std::abs(a.f[2]) > threshold)
 			return true;
 	}
 
@@ -480,7 +480,7 @@ static void reindexMesh(Mesh& mesh)
 	if (streams.empty())
 		return;
 
-	std::vector<unsigned int> remap(total_vertices);
+	std::vector<datatype_t> remap(total_vertices);
 	size_t unique_vertices = meshopt_generateVertexRemapMulti(&remap[0], &mesh.indices[0], total_indices, total_vertices, &streams[0], streams.size());
 	assert(unique_vertices <= total_vertices);
 
@@ -499,14 +499,14 @@ static void filterTriangles(Mesh& mesh)
 {
 	assert(mesh.type == cgltf_primitive_type_triangles);
 
-	unsigned int* indices = &mesh.indices[0];
+	datatype_t* indices = &mesh.indices[0];
 	size_t total_indices = mesh.indices.size();
 
 	size_t write = 0;
 
 	for (size_t i = 0; i < total_indices; i += 3)
 	{
-		unsigned int a = indices[i + 0], b = indices[i + 1], c = indices[i + 2];
+		datatype_t a = indices[i + 0], b = indices[i + 1], c = indices[i + 2];
 
 		if (a != b && a != c && b != c)
 		{
@@ -529,7 +529,7 @@ static Stream* getStream(Mesh& mesh, cgltf_attribute_type type, int index = 0)
 	return 0;
 }
 
-static void simplifyMesh(Mesh& mesh, float threshold, bool aggressive)
+static void simplifyMesh(Mesh& mesh, real_t threshold, bool aggressive)
 {
 	assert(mesh.type == cgltf_primitive_type_triangles);
 
@@ -543,13 +543,13 @@ static void simplifyMesh(Mesh& mesh, float threshold, bool aggressive)
 	size_t vertex_count = mesh.streams[0].data.size();
 
 	size_t target_index_count = size_t(double(mesh.indices.size() / 3) * threshold) * 3;
-	float target_error = 1e-2f;
-	float target_error_aggressive = 1e-1f;
+	real_t target_error = 1e-2f;
+	real_t target_error_aggressive = 1e-1f;
 
 	if (target_index_count < 1)
 		return;
 
-	std::vector<unsigned int> indices(mesh.indices.size());
+	std::vector<datatype_t> indices(mesh.indices.size());
 	indices.resize(meshopt_simplify(&indices[0], &mesh.indices[0], mesh.indices.size(), positions->data[0].f, vertex_count, sizeof(Attr), target_index_count, target_error));
 	mesh.indices.swap(indices);
 
@@ -578,7 +578,7 @@ static void optimizeMesh(Mesh& mesh, bool compressmore)
 	else
 		meshopt_optimizeVertexCache(&mesh.indices[0], &mesh.indices[0], mesh.indices.size(), vertex_count);
 
-	std::vector<unsigned int> remap(vertex_count);
+	std::vector<datatype_t> remap(vertex_count);
 	size_t unique_vertices = meshopt_optimizeVertexFetchRemap(&remap[0], &mesh.indices[0], mesh.indices.size(), vertex_count);
 	assert(unique_vertices <= vertex_count);
 
@@ -595,8 +595,8 @@ static void optimizeMesh(Mesh& mesh, bool compressmore)
 
 struct BoneInfluence
 {
-	float i;
-	float w;
+	real_t i;
+	real_t w;
 };
 
 struct BoneInfluenceWeightPredicate
@@ -630,7 +630,7 @@ static void filterBones(Mesh& mesh)
 		return;
 
 	// weights below cutoff can't be represented in quantized 8-bit storage
-	const float weight_cutoff = 0.5f / 255.f;
+	const real_t weight_cutoff = 0.5f / 255.f;
 
 	size_t vertex_count = mesh.streams[0].data.size();
 
@@ -689,7 +689,7 @@ static void filterBones(Mesh& mesh)
 	}
 }
 
-static void simplifyPointMesh(Mesh& mesh, float threshold)
+static void simplifyPointMesh(Mesh& mesh, real_t threshold)
 {
 	assert(mesh.type == cgltf_primitive_type_points);
 
@@ -707,7 +707,7 @@ static void simplifyPointMesh(Mesh& mesh, float threshold)
 	if (target_vertex_count < 1)
 		return;
 
-	std::vector<unsigned int> indices(target_vertex_count);
+	std::vector<datatype_t> indices(target_vertex_count);
 	indices.resize(meshopt_simplifyPoints(&indices[0], positions->data[0].f, vertex_count, sizeof(Attr), target_vertex_count));
 
 	std::vector<Attr> scratch(indices.size());
@@ -735,7 +735,7 @@ static void sortPointMesh(Mesh& mesh)
 
 	size_t vertex_count = mesh.streams[0].data.size();
 
-	std::vector<unsigned int> remap(vertex_count);
+	std::vector<datatype_t> remap(vertex_count);
 	meshopt_spatialSortRemap(&remap[0], positions->data[0].f, vertex_count, sizeof(Attr));
 
 	for (size_t i = 0; i < mesh.streams.size(); ++i)
@@ -775,10 +775,10 @@ void processMesh(Mesh& mesh, const Settings& settings)
 
 #ifndef NDEBUG
 extern MESHOPTIMIZER_API unsigned char* meshopt_simplifyDebugKind;
-extern MESHOPTIMIZER_API unsigned int* meshopt_simplifyDebugLoop;
-extern MESHOPTIMIZER_API unsigned int* meshopt_simplifyDebugLoopBack;
+extern MESHOPTIMIZER_API datatype_t* meshopt_simplifyDebugLoop;
+extern MESHOPTIMIZER_API datatype_t* meshopt_simplifyDebugLoopBack;
 
-void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, float ratio)
+void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, real_t ratio)
 {
 	Mesh mesh = source;
 	assert(mesh.type == cgltf_primitive_type_triangles);
@@ -793,8 +793,8 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, float ratio)
 	size_t vertex_count = mesh.streams[0].data.size();
 
 	std::vector<unsigned char> kind(vertex_count);
-	std::vector<unsigned int> loop(vertex_count);
-	std::vector<unsigned int> loopback(vertex_count);
+	std::vector<datatype_t> loop(vertex_count);
+	std::vector<datatype_t> loopback(vertex_count);
 	std::vector<unsigned char> live(vertex_count);
 
 	meshopt_simplifyDebugKind = &kind[0];
@@ -851,7 +851,7 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, float ratio)
 
 	for (size_t i = 0; i < vertex_count; ++i)
 		if (live[i] && kind[i] != 0)
-			kinds.indices.push_back(unsigned(i));
+			kinds.indices.push_back(datatype_t(i));
 
 	loops.type = cgltf_primitive_type_lines;
 
@@ -860,16 +860,16 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, float ratio)
 	for (size_t i = 0; i < vertex_count; ++i)
 		if (live[i] && (kind[i] == 1 || kind[i] == 2))
 		{
-			if (loop[i] != ~0u && live[loop[i]])
+			if (loop[i] != ALL_BITS_ONE && live[loop[i]])
 			{
-				loops.indices.push_back(unsigned(i));
+				loops.indices.push_back(datatype_t(i));
 				loops.indices.push_back(loop[i]);
 			}
 
-			if (loopback[i] != ~0u && live[loopback[i]])
+			if (loopback[i] != ALL_BITS_ONE && live[loopback[i]])
 			{
 				loops.indices.push_back(loopback[i]);
-				loops.indices.push_back(unsigned(i));
+				loops.indices.push_back(datatype_t(i));
 			}
 		}
 }
@@ -887,13 +887,13 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 	const Stream* positions = getStream(mesh, cgltf_attribute_type_position);
 	assert(positions);
 
-	const float cone_weight = 0.f;
+	const real_t cone_weight = 0.f;
 
 	size_t max_triangles = (max_vertices * 2 + 3) & ~3;
 	size_t max_meshlets = meshopt_buildMeshletsBound(mesh.indices.size(), max_vertices, max_triangles);
 
 	std::vector<meshopt_Meshlet> ml(max_meshlets);
-	std::vector<unsigned int> mlv(max_meshlets * max_vertices);
+	std::vector<datatype_t> mlv(max_meshlets * max_vertices);
 	std::vector<unsigned char> mlt(max_meshlets * max_triangles * 3);
 
 	if (scan)
@@ -911,14 +911,14 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 	{
 		const meshopt_Meshlet& m = ml[i];
 
-		unsigned int h = unsigned(i);
+		datatype_t h = datatype_t(i);
 		h ^= h >> 13;
 		h *= 0x5bd1e995;
 		h ^= h >> 15;
 
-		Attr c = {{float(h & 0xff) / 255.f, float((h >> 8) & 0xff) / 255.f, float((h >> 16) & 0xff) / 255.f, 1.f}};
+		Attr c = {{real_t(h & 0xff) / 255.f, real_t((h >> 8) & 0xff) / 255.f, real_t((h >> 16) & 0xff) / 255.f, 1.f}};
 
-		unsigned int offset = unsigned(mv.data.size());
+		datatype_t offset = datatype_t(mv.data.size());
 
 		for (size_t j = 0; j < m.vertex_count; ++j)
 		{
@@ -950,30 +950,30 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 
 		meshopt_Bounds mb = meshopt_computeMeshletBounds(&mlv[m.vertex_offset], &mlt[m.triangle_offset], m.triangle_count, positions->data[0].f, positions->data.size(), sizeof(Attr));
 
-		unsigned int h = unsigned(i);
+		datatype_t h = datatype_t(i);
 		h ^= h >> 13;
 		h *= 0x5bd1e995;
 		h ^= h >> 15;
 
-		Attr c = {{float(h & 0xff) / 255.f, float((h >> 8) & 0xff) / 255.f, float((h >> 16) & 0xff) / 255.f, 0.1f}};
+		Attr c = {{real_t(h & 0xff) / 255.f, real_t((h >> 8) & 0xff) / 255.f, real_t((h >> 16) & 0xff) / 255.f, 0.1f}};
 
-		unsigned int offset = unsigned(bv.data.size());
+		datatype_t offset = datatype_t(bv.data.size());
 
 		const int N = 10;
 
 		for (int y = 0; y <= N; ++y)
 		{
-			float u = (y == N) ? 0 : float(y) / N * 2 * 3.1415926f;
-			float sinu = sinf(u), cosu = cosf(u);
+			real_t u = (y == N) ? 0 : real_t(y) / N * 2 * 3.1415926f;
+			real_t sinu = sinf(u), cosu = cosf(u);
 
 			for (int x = 0; x <= N; ++x)
 			{
-				float v = float(x) / N * 3.1415926f;
-				float sinv = sinf(v), cosv = cosf(v);
+				real_t v = real_t(x) / N * 3.1415926f;
+				real_t sinv = sinf(v), cosv = cosf(v);
 
-				float fx = sinv * cosu;
-				float fy = sinv * sinu;
-				float fz = cosv;
+				real_t fx = sinv * cosu;
+				real_t fy = sinv * sinu;
+				real_t fz = cosv;
 
 				Attr p = {{mb.center[0] + mb.radius * fx, mb.center[1] + mb.radius * fy, mb.center[2] + mb.radius * fz, 1.f}};
 
