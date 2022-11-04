@@ -20,16 +20,16 @@ namespace meshopt
 {
 	struct VertexScoreTable
 	{
-		float cache[1 + kCacheSizeMax];
-		float live[1 + kValenceMax];
+		real_t cache[1 + kCacheSizeMax];
+		real_t live[1 + kValenceMax];
 	};
 } // namespace meshopt
 
-void meshopt_optimizeVertexCacheTable(unsigned int* destination, const unsigned int* indices, size_t index_count, size_t vertex_count, const meshopt::VertexScoreTable* table);
+void meshopt_optimizeVertexCacheTable(datatype_t* destination, const datatype_t* indices, size_t index_count, size_t vertex_count, const meshopt::VertexScoreTable* table);
 
 struct Profile
 {
-	float weight;
+	real_t weight;
 	int cache, warp, triangle; // vcache tuning parameters
 	int compression;
 };
@@ -67,9 +67,9 @@ uint32_t pcg32_random_r(pcg32_random_t* rng)
 
 pcg32_random_t rngstate = PCG32_INITIALIZER;
 
-float rand01()
+real_t rand01()
 {
-	return pcg32_random_r(&rngstate) / float(1ull << 32);
+	return pcg32_random_r(&rngstate) / real_t(1ull << 32);
 }
 
 uint32_t rand32()
@@ -79,9 +79,9 @@ uint32_t rand32()
 
 struct State
 {
-	float cache[kCacheSizeMax];
-	float live[kValenceMax];
-	float fitness;
+	real_t cache[kCacheSizeMax];
+	real_t live[kValenceMax];
+	real_t fitness;
 };
 
 struct Mesh
@@ -89,12 +89,12 @@ struct Mesh
 	const char* name;
 
 	size_t vertex_count;
-	std::vector<unsigned int> indices;
+	std::vector<datatype_t> indices;
 
-	float metric_base[Profile_Count];
+	real_t metric_base[Profile_Count];
 };
 
-Mesh gridmesh(unsigned int N)
+Mesh gridmesh(datatype_t N)
 {
 	Mesh result;
 
@@ -103,8 +103,8 @@ Mesh gridmesh(unsigned int N)
 	result.vertex_count = (N + 1) * (N + 1);
 	result.indices.reserve(N * N * 6);
 
-	for (unsigned int y = 0; y < N; ++y)
-		for (unsigned int x = 0; x < N; ++x)
+	for (datatype_t y = 0; y < N; ++y)
+		for (datatype_t x = 0; x < N; ++x)
 		{
 			result.indices.push_back((y + 0) * (N + 1) + (x + 0));
 			result.indices.push_back((y + 0) * (N + 1) + (x + 1));
@@ -129,14 +129,14 @@ Mesh objmesh(const char* path)
 
 	size_t total_indices = 0;
 
-	for (unsigned int i = 0; i < obj->face_count; ++i)
+	for (datatype_t i = 0; i < obj->face_count; ++i)
 		total_indices += 3 * (obj->face_vertices[i] - 2);
 
 	struct Vertex
 	{
-		float px, py, pz;
-		float nx, ny, nz;
-		float tx, ty;
+		real_t px, py, pz;
+		real_t nx, ny, nz;
+		real_t tx, ty;
 	};
 
 	std::vector<Vertex> vertices(total_indices);
@@ -144,9 +144,9 @@ Mesh objmesh(const char* path)
 	size_t vertex_offset = 0;
 	size_t index_offset = 0;
 
-	for (unsigned int i = 0; i < obj->face_count; ++i)
+	for (datatype_t i = 0; i < obj->face_count; ++i)
 	{
-		for (unsigned int j = 0; j < obj->face_vertices[i]; ++j)
+		for (datatype_t j = 0; j < obj->face_vertices[i]; ++j)
 		{
 			fastObjIndex gi = obj->indices[index_offset + j];
 
@@ -183,7 +183,7 @@ Mesh objmesh(const char* path)
 
 	result.name = path;
 
-	std::vector<unsigned int> remap(total_indices);
+	std::vector<datatype_t> remap(total_indices);
 
 	size_t total_vertices = meshopt_generateVertexRemap(&remap[0], NULL, total_indices, &vertices[0], total_indices, sizeof(Vertex));
 
@@ -203,15 +203,15 @@ size_t compress(const std::vector<T>& data, int level = SDEFL_LVL_DEF)
 	return sdeflate(&s, &cbuf[0], reinterpret_cast<const unsigned char*>(&data[0]), int(data.size() * sizeof(T)), level);
 }
 
-void compute_metric(const State* state, const Mesh& mesh, float result[Profile_Count])
+void compute_metric(const State* state, const Mesh& mesh, real_t result[Profile_Count])
 {
-	std::vector<unsigned int> indices(mesh.indices.size());
+	std::vector<datatype_t> indices(mesh.indices.size());
 
 	if (state)
 	{
 		meshopt::VertexScoreTable table = {};
-		memcpy(table.cache + 1, state->cache, kCacheSizeMax * sizeof(float));
-		memcpy(table.live + 1, state->live, kValenceMax * sizeof(float));
+		memcpy(table.cache + 1, state->cache, kCacheSizeMax * sizeof(real_t));
+		memcpy(table.live + 1, state->live, kValenceMax * sizeof(real_t));
 		meshopt_optimizeVertexCacheTable(&indices[0], &mesh.indices[0], mesh.indices.size(), mesh.vertex_count, &table);
 	}
 	else
@@ -249,14 +249,14 @@ void compute_metric(const State* state, const Mesh& mesh, float result[Profile_C
 	}
 }
 
-float fitness_score(const State& state, const std::vector<Mesh>& meshes)
+real_t fitness_score(const State& state, const std::vector<Mesh>& meshes)
 {
-	float result = 0;
-	float count = 0;
+	real_t result = 0;
+	real_t count = 0;
 
 	for (auto& mesh : meshes)
 	{
-		float metric[Profile_Count];
+		real_t metric[Profile_Count];
 		compute_metric(&state, mesh, metric);
 
 		for (int profile = 0; profile < Profile_Count; ++profile)
@@ -293,7 +293,7 @@ std::vector<State> gen0(size_t count, const std::vector<Mesh>& meshes)
 
 // https://en.wikipedia.org/wiki/Differential_evolution
 // Good Parameters for Differential Evolution. Magnus Erik Hvass Pedersen, 2010
-std::pair<State, float> genN(std::vector<State>& seed, const std::vector<Mesh>& meshes, float crossover = 0.8803f, float weight = 0.4717f)
+std::pair<State, real_t> genN(std::vector<State>& seed, const std::vector<Mesh>& meshes, real_t crossover = 0.8803f, real_t weight = 0.4717f)
 {
 	std::vector<State> result(seed.size());
 
@@ -313,7 +313,7 @@ std::pair<State, float> genN(std::vector<State>& seed, const std::vector<Mesh>& 
 
 			for (int j = 0; j < kCacheSizeMax; ++j)
 			{
-				float r = rand01();
+				real_t r = rand01();
 
 				if (r < crossover || j == rc)
 					result[i].cache[j] = std::max(0.f, std::min(1.f, seed[a].cache[j] + weight * (seed[b].cache[j] - seed[c].cache[j])));
@@ -323,7 +323,7 @@ std::pair<State, float> genN(std::vector<State>& seed, const std::vector<Mesh>& 
 
 			for (int j = 0; j < kValenceMax; ++j)
 			{
-				float r = rand01();
+				real_t r = rand01();
 
 				if (r < crossover || j == rl)
 					result[i].live[j] = std::max(0.f, std::min(1.f, seed[a].live[j] + weight * (seed[b].live[j] - seed[c].live[j])));
@@ -342,7 +342,7 @@ std::pair<State, float> genN(std::vector<State>& seed, const std::vector<Mesh>& 
 	}
 
 	State best = {};
-	float bestfit = 0;
+	real_t bestfit = 0;
 
 	for (size_t i = 0; i < seed.size(); ++i)
 	{
@@ -414,11 +414,11 @@ void dump_state(const State& state)
 
 void dump_stats(const State& state, const std::vector<Mesh>& meshes)
 {
-	float improvement[Profile_Count] = {};
+	real_t improvement[Profile_Count] = {};
 
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
-		float metric[Profile_Count];
+		real_t metric[Profile_Count];
 		compute_metric(&state, meshes[i], metric);
 
 		printf(" %s", meshes[i].name);
@@ -431,7 +431,7 @@ void dump_stats(const State& state, const std::vector<Mesh>& meshes)
 
 	printf("; improvement");
 	for (int profile = 0; profile < Profile_Count; ++profile)
-		printf(" %f", improvement[profile] / float(meshes.size()));
+		printf(" %f", improvement[profile] / real_t(meshes.size()));
 
 	printf("\n");
 }

@@ -18,7 +18,7 @@ void append(std::string& s, size_t v)
 	s += buf;
 }
 
-void append(std::string& s, float v)
+void append(std::string& s, real_t v)
 {
 	char buf[64];
 	snprintf(buf, sizeof(buf), "%.9g", v);

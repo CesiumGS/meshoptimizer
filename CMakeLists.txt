@@ -56,9 +56,9 @@ set(GLTF_SOURCES
 )
 
 if(MSVC)
-    add_compile_options(/W4)
+	add_compile_options(/W4 /D MESHOPTIMIZER_64BIT)
 else()
-    add_compile_options(-Wall -Wextra -Wshadow -Wno-missing-field-initializers)
+	add_compile_options(-Wall -Wextra -Wshadow -Wno-missing-field-initializers -D MESHOPTIMIZER_64BIT)
 endif()
 
 if(MESHOPT_WERROR)

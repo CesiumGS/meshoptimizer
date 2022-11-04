@@ -96,10 +96,10 @@ static int readInt16(const std::string& data, size_t offset)
 
 static int readInt32(const std::string& data, size_t offset)
 {
-	return (unsigned((unsigned char)data[offset]) << 24) |
-	       (unsigned((unsigned char)data[offset + 1]) << 16) |
-	       (unsigned((unsigned char)data[offset + 2]) << 8) |
-	       unsigned((unsigned char)data[offset + 3]);
+	return (datatype_t((unsigned char)data[offset]) << 24) |
+	       (datatype_t((unsigned char)data[offset + 1]) << 16) |
+	       (datatype_t((unsigned char)data[offset + 2]) << 8) |
+	       datatype_t((unsigned char)data[offset + 3]);
 }
 
 static bool getDimensionsPng(const std::string& data, int& width, int& height)
@@ -139,7 +139,7 @@ static bool getDimensionsJpeg(const std::string& data, int& width, int& height)
 		}
 
 		// d0..d9 correspond to SOI, RSTn, EOI
-		if (marker == 0 || unsigned(marker - '\xd0') <= 9)
+		if (marker == 0 || datatype_t(marker - '\xd0') <= 9)
 		{
 			offset += 2;
 			continue; // no payload
@@ -248,7 +248,7 @@ void adjustDimensions(int& width, int& height, const Settings& settings)
 
 	if (settings.texture_limit && (width > settings.texture_limit || height > settings.texture_limit))
 	{
-		float limit_scale = float(settings.texture_limit) / float(width > height ? width : height);
+		real_t limit_scale = real_t(settings.texture_limit) / real_t(width > height ? width : height);
 
 		width = int(width * limit_scale);
 		height = int(height * limit_scale);

@@ -180,8 +180,8 @@ static void writeTextureInfo(std::string& json, const cgltf_data* data, const cg
 	{
 		transform.offset[0] += qt->offset[0];
 		transform.offset[1] += qt->offset[1];
-		transform.scale[0] *= qt->scale[0] / float((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
-		transform.scale[1] *= qt->scale[1] / float((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
+		transform.scale[0] *= qt->scale[0] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
+		transform.scale[1] *= qt->scale[1] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
 		has_transform = true;
 	}
 
@@ -221,8 +221,8 @@ static void writeTextureInfo(std::string& json, const cgltf_data* data, const cg
 	append(json, "}");
 }
 
-static const float white[4] = {1, 1, 1, 1};
-static const float black[4] = {0, 0, 0, 0};
+static const real_t white[4] = {1, 1, 1, 1};
+static const real_t black[4] = {0, 0, 0, 0};
 
 static void writeMaterialComponent(std::string& json, const cgltf_data* data, const cgltf_pbr_metallic_roughness& pbr, const QuantizationTexture* qt)
 {
@@ -470,7 +470,7 @@ static void writeMaterialComponent(std::string& json, const cgltf_data* data, co
 	if (tm.thickness_factor != 0)
 	{
 		// thickness is in mesh coordinate space which is rescaled by quantization
-		float node_scale = qp ? qp->scale / float((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f) : 1.f;
+		real_t node_scale = qp ? qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f) : 1.f;
 
 		comma(json);
 		append(json, "\"thicknessFactor\":");
@@ -753,7 +753,7 @@ void writeBufferView(std::string& json, BufferView::Kind kind, StreamFormat::Fil
 	append(json, "}");
 }
 
-static void writeAccessor(std::string& json, size_t view, size_t offset, cgltf_type type, cgltf_component_type component_type, bool normalized, size_t count, const float* min = 0, const float* max = 0, size_t numminmax = 0)
+static void writeAccessor(std::string& json, size_t view, size_t offset, cgltf_type type, cgltf_component_type component_type, bool normalized, size_t count, const real_t* min = 0, const real_t* max = 0, size_t numminmax = 0)
 {
 	append(json, "{\"bufferView\":");
 	append(json, view);
@@ -946,8 +946,8 @@ void writeMeshAttributes(std::string& json, std::vector<BufferView>& views, std:
 		comma(json_accessors);
 		if (stream.type == cgltf_attribute_type_position)
 		{
-			float min[3] = {};
-			float max[3] = {};
+			real_t min[3] = {};
+			real_t max[3] = {};
 			getPositionBounds(min, max, stream, qp, settings);
 
 			writeAccessor(json_accessors, view, offset, format.type, format.component_type, format.normalized, stream.data.size(), min, max, 3);
@@ -990,12 +990,12 @@ size_t writeMeshIndices(std::vector<BufferView>& views, std::string& json_access
 	return index_accr;
 }
 
-static size_t writeAnimationTime(std::vector<BufferView>& views, std::string& json_accessors, size_t& accr_offset, float mint, int frames, float period, const Settings& settings)
+static size_t writeAnimationTime(std::vector<BufferView>& views, std::string& json_accessors, size_t& accr_offset, real_t mint, int frames, real_t period, const Settings& settings)
 {
-	std::vector<float> time(frames);
+	std::vector<real_t> time(frames);
 
 	for (int j = 0; j < frames; ++j)
-		time[j] = mint + float(j) * period;
+		time[j] = mint + real_t(j) * period;
 
 	std::string scratch;
 	StreamFormat format = writeTimeStream(scratch, time);
@@ -1019,16 +1019,16 @@ size_t writeJointBindMatrices(std::vector<BufferView>& views, std::string& json_
 
 	for (size_t j = 0; j < skin.joints_count; ++j)
 	{
-		float transform[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+		real_t transform[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
 		if (skin.inverse_bind_matrices)
 		{
-			cgltf_accessor_read_float(skin.inverse_bind_matrices, j, transform, 16);
+			cgltf_accessor_read_real_t(skin.inverse_bind_matrices, j, transform, 16);
 		}
 
-		if (settings.quantize && !settings.pos_float)
+		if (settings.quantize && !settings.pos_real_t)
 		{
-			float node_scale = qp.scale / float((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
+			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
 
 			// pos_offset has to be applied first, thus it results in an offset rotated by the bind matrix
 			transform[12] += qp.offset[0] * transform[0] + qp.offset[1] * transform[4] + qp.offset[2] * transform[8];
@@ -1083,11 +1083,11 @@ size_t writeInstances(std::vector<BufferView>& views, std::string& json_accessor
 	{
 		decomposeTransform(position[i].f, rotation[i].f, scale[i].f, transforms[i].data);
 
-		if (settings.quantize && !settings.pos_float)
+		if (settings.quantize && !settings.pos_real_t)
 		{
-			const float* transform = transforms[i].data;
+			const real_t* transform = transforms[i].data;
 
-			float node_scale = qp.scale / float((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
+			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
 
 			// pos_offset has to be applied first, thus it results in an offset rotated by the instance matrix
 			position[i].f[0] += qp.offset[0] * transform[0] + qp.offset[1] * transform[4] + qp.offset[2] * transform[8];
@@ -1123,7 +1123,7 @@ void writeMeshNode(std::string& json, size_t mesh_offset, cgltf_node* node, cglt
 	}
 	if (qp)
 	{
-		float node_scale = qp->scale / float((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f);
+		real_t node_scale = qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f);
 
 		append(json, ",\"translation\":[");
 		append(json, qp->offset[0]);
@@ -1370,8 +1370,8 @@ void writeAnimation(std::string& json, std::vector<BufferView>& views, std::stri
 
 	assert(int(needs_time) + int(needs_pose) + int(needs_range) <= 2);
 
-	float animation_period = 1.f / float(settings.anim_freq);
-	float animation_length = float(animation.frames - 1) * animation_period;
+	real_t animation_period = 1.f / real_t(settings.anim_freq);
+	real_t animation_length = real_t(animation.frames - 1) * animation_period;
 
 	size_t time_accr = needs_time ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, animation.frames, animation_period, settings) : 0;
 	size_t pose_accr = needs_pose ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, 1, 0.f, settings) : 0;

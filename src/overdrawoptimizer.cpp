@@ -10,15 +10,15 @@
 namespace meshopt
 {
 
-static void calculateSortData(float* sort_data, const unsigned int* indices, size_t index_count, const float* vertex_positions, size_t vertex_positions_stride, const unsigned int* clusters, size_t cluster_count)
+static void calculateSortData(real_t* sort_data, const datatype_t* indices, size_t index_count, const real_t* vertex_positions, size_t vertex_positions_stride, const datatype_t* clusters, size_t cluster_count)
 {
-	size_t vertex_stride_float = vertex_positions_stride / sizeof(float);
+	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
 
-	float mesh_centroid[3] = {};
+	real_t mesh_centroid[3] = {};
 
 	for (size_t i = 0; i < index_count; ++i)
 	{
-		const float* p = vertex_positions + vertex_stride_float * indices[i];
+		const real_t* p = vertex_positions + vertex_stride_real_t * indices[i];
 
 		mesh_centroid[0] += p[0];
 		mesh_centroid[1] += p[1];
@@ -35,24 +35,24 @@ static void calculateSortData(float* sort_data, const unsigned int* indices, siz
 		size_t cluster_end = (cluster + 1 < cluster_count) ? clusters[cluster + 1] * 3 : index_count;
 		assert(cluster_begin < cluster_end);
 
-		float cluster_area = 0;
-		float cluster_centroid[3] = {};
-		float cluster_normal[3] = {};
+		real_t cluster_area = 0;
+		real_t cluster_centroid[3] = {};
+		real_t cluster_normal[3] = {};
 
 		for (size_t i = cluster_begin; i < cluster_end; i += 3)
 		{
-			const float* p0 = vertex_positions + vertex_stride_float * indices[i + 0];
-			const float* p1 = vertex_positions + vertex_stride_float * indices[i + 1];
-			const float* p2 = vertex_positions + vertex_stride_float * indices[i + 2];
+			const real_t* p0 = vertex_positions + vertex_stride_real_t * indices[i + 0];
+			const real_t* p1 = vertex_positions + vertex_stride_real_t * indices[i + 1];
+			const real_t* p2 = vertex_positions + vertex_stride_real_t * indices[i + 2];
 
-			float p10[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
-			float p20[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
+			real_t p10[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
+			real_t p20[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
 
-			float normalx = p10[1] * p20[2] - p10[2] * p20[1];
-			float normaly = p10[2] * p20[0] - p10[0] * p20[2];
-			float normalz = p10[0] * p20[1] - p10[1] * p20[0];
+			real_t normalx = p10[1] * p20[2] - p10[2] * p20[1];
+			real_t normaly = p10[2] * p20[0] - p10[0] * p20[2];
+			real_t normalz = p10[0] * p20[1] - p10[1] * p20[0];
 
-			float area = sqrtf(normalx * normalx + normaly * normaly + normalz * normalz);
+			real_t area = sqrtf(normalx * normalx + normaly * normaly + normalz * normalz);
 
 			cluster_centroid[0] += (p0[0] + p1[0] + p2[0]) * (area / 3);
 			cluster_centroid[1] += (p0[1] + p1[1] + p2[1]) * (area / 3);
@@ -63,33 +63,33 @@ static void calculateSortData(float* sort_data, const unsigned int* indices, siz
 			cluster_area += area;
 		}
 
-		float inv_cluster_area = cluster_area == 0 ? 0 : 1 / cluster_area;
+		real_t inv_cluster_area = cluster_area == 0 ? 0 : 1 / cluster_area;
 
 		cluster_centroid[0] *= inv_cluster_area;
 		cluster_centroid[1] *= inv_cluster_area;
 		cluster_centroid[2] *= inv_cluster_area;
 
-		float cluster_normal_length = sqrtf(cluster_normal[0] * cluster_normal[0] + cluster_normal[1] * cluster_normal[1] + cluster_normal[2] * cluster_normal[2]);
-		float inv_cluster_normal_length = cluster_normal_length == 0 ? 0 : 1 / cluster_normal_length;
+		real_t cluster_normal_length = sqrtf(cluster_normal[0] * cluster_normal[0] + cluster_normal[1] * cluster_normal[1] + cluster_normal[2] * cluster_normal[2]);
+		real_t inv_cluster_normal_length = cluster_normal_length == 0 ? 0 : 1 / cluster_normal_length;
 
 		cluster_normal[0] *= inv_cluster_normal_length;
 		cluster_normal[1] *= inv_cluster_normal_length;
 		cluster_normal[2] *= inv_cluster_normal_length;
 
-		float centroid_vector[3] = {cluster_centroid[0] - mesh_centroid[0], cluster_centroid[1] - mesh_centroid[1], cluster_centroid[2] - mesh_centroid[2]};
+		real_t centroid_vector[3] = {cluster_centroid[0] - mesh_centroid[0], cluster_centroid[1] - mesh_centroid[1], cluster_centroid[2] - mesh_centroid[2]};
 
 		sort_data[cluster] = centroid_vector[0] * cluster_normal[0] + centroid_vector[1] * cluster_normal[1] + centroid_vector[2] * cluster_normal[2];
 	}
 }
 
-static void calculateSortOrderRadix(unsigned int* sort_order, const float* sort_data, unsigned short* sort_keys, size_t cluster_count)
+static void calculateSortOrderRadix(datatype_t* sort_order, const real_t* sort_data, unsigned short* sort_keys, size_t cluster_count)
 {
 	// compute sort data bounds and renormalize, using fixed point snorm
-	float sort_data_max = 1e-3f;
+	real_t sort_data_max = 1e-3f;
 
 	for (size_t i = 0; i < cluster_count; ++i)
 	{
-		float dpa = fabsf(sort_data[i]);
+		real_t dpa = fabsf(sort_data[i]);
 
 		sort_data_max = (sort_data_max < dpa) ? dpa : sort_data_max;
 	}
@@ -99,13 +99,13 @@ static void calculateSortOrderRadix(unsigned int* sort_order, const float* sort_
 	for (size_t i = 0; i < cluster_count; ++i)
 	{
 		// note that we flip distribution since high dot product should come first
-		float sort_key = 0.5f - 0.5f * (sort_data[i] / sort_data_max);
+		real_t sort_key = 0.5f - 0.5f * (sort_data[i] / sort_data_max);
 
 		sort_keys[i] = meshopt_quantizeUnorm(sort_key, sort_bits) & ((1 << sort_bits) - 1);
 	}
 
 	// fill histogram for counting sort
-	unsigned int histogram[1 << sort_bits];
+	datatype_t histogram[1 << sort_bits];
 	memset(histogram, 0, sizeof(histogram));
 
 	for (size_t i = 0; i < cluster_count; ++i)
@@ -119,7 +119,7 @@ static void calculateSortOrderRadix(unsigned int* sort_order, const float* sort_
 	for (size_t i = 0; i < 1 << sort_bits; ++i)
 	{
 		size_t count = histogram[i];
-		histogram[i] = unsigned(histogram_sum);
+		histogram[i] = datatype_t(histogram_sum);
 		histogram_sum += count;
 	}
 
@@ -128,13 +128,13 @@ static void calculateSortOrderRadix(unsigned int* sort_order, const float* sort_
 	// compute sort order based on offsets
 	for (size_t i = 0; i < cluster_count; ++i)
 	{
-		sort_order[histogram[sort_keys[i]]++] = unsigned(i);
+		sort_order[histogram[sort_keys[i]]++] = datatype_t(i);
 	}
 }
 
-static unsigned int updateCache(unsigned int a, unsigned int b, unsigned int c, unsigned int cache_size, unsigned int* cache_timestamps, unsigned int& timestamp)
+static datatype_t updateCache(datatype_t a, datatype_t b, datatype_t c, datatype_t cache_size, datatype_t* cache_timestamps, datatype_t& timestamp)
 {
-	unsigned int cache_misses = 0;
+	datatype_t cache_misses = 0;
 
 	// if vertex is not in cache, put it in cache
 	if (timestamp - cache_timestamps[a] > cache_size)
@@ -158,11 +158,11 @@ static unsigned int updateCache(unsigned int a, unsigned int b, unsigned int c, 
 	return cache_misses;
 }
 
-static size_t generateHardBoundaries(unsigned int* destination, const unsigned int* indices, size_t index_count, size_t vertex_count, unsigned int cache_size, unsigned int* cache_timestamps)
+static size_t generateHardBoundaries(datatype_t* destination, const datatype_t* indices, size_t index_count, size_t vertex_count, datatype_t cache_size, datatype_t* cache_timestamps)
 {
-	memset(cache_timestamps, 0, vertex_count * sizeof(unsigned int));
+	memset(cache_timestamps, 0, vertex_count * sizeof(datatype_t));
 
-	unsigned int timestamp = cache_size + 1;
+	datatype_t timestamp = cache_size + 1;
 
 	size_t face_count = index_count / 3;
 
@@ -170,7 +170,7 @@ static size_t generateHardBoundaries(unsigned int* destination, const unsigned i
 
 	for (size_t i = 0; i < face_count; ++i)
 	{
-		unsigned int m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
+		datatype_t m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
 
 		// when all three vertices are not in the cache it's usually relatively safe to assume that this is a new patch in the mesh
 		// that is disjoint from previous vertices; sometimes it might come back to reference existing vertices but that frequently
@@ -178,7 +178,7 @@ static size_t generateHardBoundaries(unsigned int* destination, const unsigned i
 		// usually the first triangle has 3 misses unless it's degenerate - thus we make sure the first cluster always starts with 0
 		if (i == 0 || m == 3)
 		{
-			destination[result++] = unsigned(i);
+			destination[result++] = datatype_t(i);
 		}
 	}
 
@@ -187,11 +187,11 @@ static size_t generateHardBoundaries(unsigned int* destination, const unsigned i
 	return result;
 }
 
-static size_t generateSoftBoundaries(unsigned int* destination, const unsigned int* indices, size_t index_count, size_t vertex_count, const unsigned int* clusters, size_t cluster_count, unsigned int cache_size, float threshold, unsigned int* cache_timestamps)
+static size_t generateSoftBoundaries(datatype_t* destination, const datatype_t* indices, size_t index_count, size_t vertex_count, const datatype_t* clusters, size_t cluster_count, datatype_t cache_size, real_t threshold, datatype_t* cache_timestamps)
 {
-	memset(cache_timestamps, 0, vertex_count * sizeof(unsigned int));
+	memset(cache_timestamps, 0, vertex_count * sizeof(datatype_t));
 
-	unsigned int timestamp = 0;
+	datatype_t timestamp = 0;
 
 	size_t result = 0;
 
@@ -205,39 +205,39 @@ static size_t generateSoftBoundaries(unsigned int* destination, const unsigned i
 		timestamp += cache_size + 1;
 
 		// measure cluster ACMR
-		unsigned int cluster_misses = 0;
+		datatype_t cluster_misses = 0;
 
 		for (size_t i = start; i < end; ++i)
 		{
-			unsigned int m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
+			datatype_t m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
 
 			cluster_misses += m;
 		}
 
-		float cluster_threshold = threshold * (float(cluster_misses) / float(end - start));
+		real_t cluster_threshold = threshold * (real_t(cluster_misses) / real_t(end - start));
 
 		// first cluster always starts from the hard cluster boundary
-		destination[result++] = unsigned(start);
+		destination[result++] = datatype_t(start);
 
 		// reset cache
 		timestamp += cache_size + 1;
 
-		unsigned int running_misses = 0;
-		unsigned int running_faces = 0;
+		datatype_t running_misses = 0;
+		datatype_t running_faces = 0;
 
 		for (size_t i = start; i < end; ++i)
 		{
-			unsigned int m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
+			datatype_t m = updateCache(indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2], cache_size, &cache_timestamps[0], timestamp);
 
 			running_misses += m;
 			running_faces += 1;
 
-			if (float(running_misses) / float(running_faces) <= cluster_threshold)
+			if (real_t(running_misses) / real_t(running_faces) <= cluster_threshold)
 			{
 				// we have reached the target ACMR with the current triangle so we need to start a new cluster on the next one
 				// note that this may mean that we add 'end` to destination for the last triangle, which will imply that the last
 				// cluster is empty; however, the 'pop_back' after the loop will clean it up
-				destination[result++] = unsigned(i + 1);
+				destination[result++] = datatype_t(i + 1);
 
 				// reset cache
 				timestamp += cache_size + 1;
@@ -267,13 +267,13 @@ static size_t generateSoftBoundaries(unsigned int* destination, const unsigned i
 
 } // namespace meshopt
 
-void meshopt_optimizeOverdraw(unsigned int* destination, const unsigned int* indices, size_t index_count, const float* vertex_positions, size_t vertex_count, size_t vertex_positions_stride, float threshold)
+void meshopt_optimizeOverdraw(datatype_t* destination, const datatype_t* indices, size_t index_count, const real_t* vertex_positions, size_t vertex_count, size_t vertex_positions_stride, real_t threshold)
 {
 	using namespace meshopt;
 
 	assert(index_count % 3 == 0);
 	assert(vertex_positions_stride >= 12 && vertex_positions_stride <= 256);
-	assert(vertex_positions_stride % sizeof(float) == 0);
+	assert(vertex_positions_stride % sizeof(real_t) == 0);
 
 	meshopt_Allocator allocator;
 
@@ -284,33 +284,33 @@ void meshopt_optimizeOverdraw(unsigned int* destination, const unsigned int* ind
 	// support in-place optimization
 	if (destination == indices)
 	{
-		unsigned int* indices_copy = allocator.allocate<unsigned int>(index_count);
-		memcpy(indices_copy, indices, index_count * sizeof(unsigned int));
+		datatype_t* indices_copy = allocator.allocate<datatype_t>(index_count);
+		memcpy(indices_copy, indices, index_count * sizeof(datatype_t));
 		indices = indices_copy;
 	}
 
-	unsigned int cache_size = 16;
+	datatype_t cache_size = 16;
 
-	unsigned int* cache_timestamps = allocator.allocate<unsigned int>(vertex_count);
+	datatype_t* cache_timestamps = allocator.allocate<datatype_t>(vertex_count);
 
 	// generate hard boundaries from full-triangle cache misses
-	unsigned int* hard_clusters = allocator.allocate<unsigned int>(index_count / 3);
+	datatype_t* hard_clusters = allocator.allocate<datatype_t>(index_count / 3);
 	size_t hard_cluster_count = generateHardBoundaries(hard_clusters, indices, index_count, vertex_count, cache_size, cache_timestamps);
 
 	// generate soft boundaries
-	unsigned int* soft_clusters = allocator.allocate<unsigned int>(index_count / 3 + 1);
+	datatype_t* soft_clusters = allocator.allocate<datatype_t>(index_count / 3 + 1);
 	size_t soft_cluster_count = generateSoftBoundaries(soft_clusters, indices, index_count, vertex_count, hard_clusters, hard_cluster_count, cache_size, threshold, cache_timestamps);
 
-	const unsigned int* clusters = soft_clusters;
+	const datatype_t* clusters = soft_clusters;
 	size_t cluster_count = soft_cluster_count;
 
 	// fill sort data
-	float* sort_data = allocator.allocate<float>(cluster_count);
+	real_t* sort_data = allocator.allocate<real_t>(cluster_count);
 	calculateSortData(sort_data, indices, index_count, vertex_positions, vertex_positions_stride, clusters, cluster_count);
 
 	// sort clusters using sort data
 	unsigned short* sort_keys = allocator.allocate<unsigned short>(cluster_count);
-	unsigned int* sort_order = allocator.allocate<unsigned int>(cluster_count);
+	datatype_t* sort_order = allocator.allocate<datatype_t>(cluster_count);
 	calculateSortOrderRadix(sort_order, sort_data, sort_keys, cluster_count);
 
 	// fill output buffer
@@ -318,14 +318,14 @@ void meshopt_optimizeOverdraw(unsigned int* destination, const unsigned int* ind
 
 	for (size_t it = 0; it < cluster_count; ++it)
 	{
-		unsigned int cluster = sort_order[it];
+		datatype_t cluster = sort_order[it];
 		assert(cluster < cluster_count);
 
 		size_t cluster_begin = clusters[cluster] * 3;
 		size_t cluster_end = (cluster + 1 < cluster_count) ? clusters[cluster + 1] * 3 : index_count;
 		assert(cluster_begin < cluster_end);
 
-		memcpy(destination + offset, indices + cluster_begin, (cluster_end - cluster_begin) * sizeof(unsigned int));
+		memcpy(destination + offset, indices + cluster_begin, (cluster_end - cluster_begin) * sizeof(datatype_t));
 		offset += cluster_end - cluster_begin;
 	}
 
