@@ -13,7 +13,7 @@ namespace meshopt
 static datatype_t findStripFirst(const datatype_t buffer[][3], datatype_t buffer_size, const datatype_t* valence)
 {
 	datatype_t index = 0;
-	datatype_t iv = not_zero;
+	datatype_t iv = ALL_BITS_ONE;
 
 	for (size_t i = 0; i < buffer_size; ++i)
 	{

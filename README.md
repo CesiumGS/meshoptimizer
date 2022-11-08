@@ -214,7 +214,7 @@ This library provides an algorithm for converting a vertex cache optimized trian
 
 ```c++
 std::vector<datatype_t> strip(meshopt_stripifyBound(index_count));
-datatype_t restart_index = not_zero;
+datatype_t restart_index = ALL_BITS_ONE;
 size_t strip_size = meshopt_stripify(&strip[0], indices, index_count, vertex_count, restart_index);
 ```
 

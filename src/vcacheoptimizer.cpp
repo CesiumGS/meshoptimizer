@@ -107,12 +107,12 @@ static datatype_t getNextVertexDeadEnd(const datatype_t* dead_end, datatype_t& d
 		++input_cursor;
 	}
 
-	return not_zero;
+	return ALL_BITS_ONE;
 }
 
 static datatype_t getNextVertexNeighbour(const datatype_t* next_candidates_begin, const datatype_t* next_candidates_end, const datatype_t* live_triangles, const datatype_t* cache_timestamps, datatype_t timestamp, datatype_t cache_size)
 {
-	datatype_t best_candidate = not_zero;
+	datatype_t best_candidate = ALL_BITS_ONE;
 	int best_priority = -1;
 
 	for (const datatype_t* next_candidate = next_candidates_begin; next_candidate != next_candidates_end; ++next_candidate)
@@ -161,7 +161,7 @@ static datatype_t getNextTriangleDeadEnd(datatype_t& input_cursor, const unsigne
 		++input_cursor;
 	}
 
-	return not_zero;
+	return ALL_BITS_ONE;
 }
 
 } // namespace meshopt
@@ -231,7 +231,7 @@ void meshopt_optimizeVertexCacheTable(datatype_t* destination, const datatype_t*
 
 	datatype_t output_triangle = 0;
 
-	while (current_triangle != not_zero)
+	while (current_triangle != ALL_BITS_ONE)
 	{
 		assert(output_triangle < face_count);
 
@@ -297,7 +297,7 @@ void meshopt_optimizeVertexCacheTable(datatype_t* destination, const datatype_t*
 			}
 		}
 
-		datatype_t best_triangle = not_zero;
+		datatype_t best_triangle = ALL_BITS_ONE;
 		real_t best_score = 0;
 
 		// update cache positions, vertex scores and triangle scores, and find next best triangle
@@ -338,7 +338,7 @@ void meshopt_optimizeVertexCacheTable(datatype_t* destination, const datatype_t*
 		// step through input triangles in order if we hit a dead-end
 		current_triangle = best_triangle;
 
-		if (current_triangle == not_zero)
+		if (current_triangle == ALL_BITS_ONE)
 		{
 			current_triangle = getNextTriangleDeadEnd(input_cursor, &emitted_flags[0], face_count);
 		}
@@ -408,7 +408,7 @@ void meshopt_optimizeVertexCacheFifo(datatype_t* destination, const datatype_t* 
 
 	datatype_t output_triangle = 0;
 
-	while (current_vertex != not_zero)
+	while (current_vertex != ALL_BITS_ONE)
 	{
 		const datatype_t* next_candidates_begin = &dead_end[0] + dead_end_top;
 
@@ -463,7 +463,7 @@ void meshopt_optimizeVertexCacheFifo(datatype_t* destination, const datatype_t* 
 		// get next vertex
 		current_vertex = getNextVertexNeighbour(next_candidates_begin, next_candidates_end, &live_triangles[0], &cache_timestamps[0], timestamp, cache_size);
 
-		if (current_vertex == not_zero)
+		if (current_vertex == ALL_BITS_ONE)
 		{
 			current_vertex = getNextVertexDeadEnd(&dead_end[0], dead_end_top, input_cursor, &live_triangles[0], vertex_count);
 		}

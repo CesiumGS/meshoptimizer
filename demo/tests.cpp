@@ -654,7 +654,7 @@ void encodeFilterOct8()
 	meshopt_decodeFilterOct(decoded, 4, 4);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(fabsf(decoded[i] / 127.f - data[i]) < 1e-2f);
+		assert(std::abs(decoded[i] / 127.f - data[i]) < 1e-2f);
 }
 
 void encodeFilterOct12()
@@ -683,7 +683,7 @@ void encodeFilterOct12()
 	meshopt_decodeFilterOct(decoded, 4, 8);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(fabsf(decoded[i] / 32767.f - data[i]) < 1e-3f);
+		assert(std::abs(decoded[i] / 32767.f - data[i]) < 1e-3f);
 }
 
 void encodeFilterQuat12()
@@ -724,7 +724,7 @@ void encodeFilterQuat12()
 		    data[i * 4 + 2] * dz +
 		    data[i * 4 + 3] * dw;
 
-		assert(fabsf(fabsf(dp) - 1.f) < 1e-4f);
+		assert(std::abs(std::abs(dp) - 1.f) < 1e-4f);
 	}
 }
 
@@ -752,7 +752,7 @@ void encodeFilterExp()
 	meshopt_decodeFilterExp(decoded, 3, 4);
 
 	for (size_t i = 0; i < 3; ++i)
-		assert(fabsf(decoded[i] - data[i]) < 1e-3f);
+		assert(std::abs(decoded[i] - data[i]) < 1e-3f);
 }
 
 static void clusterBoundsDegenerate()

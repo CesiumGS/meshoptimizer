@@ -177,9 +177,9 @@ void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[
 	real_t sign = (det < 0.f) ? -1.f : 1.f;
 
 	// recover scale from axis lengths
-	scale[0] = sqrtf(m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0]) * sign;
-	scale[1] = sqrtf(m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1]) * sign;
-	scale[2] = sqrtf(m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2]) * sign;
+	scale[0] = std::sqrt(m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0]) * sign;
+	scale[1] = std::sqrt(m[0][1] * m[0][1] + m[1][1] * m[1][1] + m[2][1] * m[2][1]) * sign;
+	scale[2] = std::sqrt(m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2]) * sign;
 
 	// normalize axes to get a pure rotation matrix
 	real_t rsx = (scale[0] == 0.f) ? 0.f : 1.f / scale[0];
@@ -197,7 +197,7 @@ void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[
 	real_t qs3 = (qc - 1) & 2 ? -1.f : 1.f;
 
 	real_t qt = 1.f - qs3 * r00 - qs2 * r11 - qs1 * r22;
-	real_t qs = 0.5f / sqrtf(qt);
+	real_t qs = 0.5f / std::sqrt(qt);
 
 	rotation[qc ^ 0] = qs * qt;
 	rotation[qc ^ 1] = qs * (r01 + qs1 * r10);

@@ -17,7 +17,7 @@ size_t meshopt_optimizeVertexFetchRemap(datatype_t* destination, const datatype_
 		datatype_t index = indices[i];
 		assert(index < vertex_count);
 
-		if (destination[index] == not_zero)
+		if (destination[index] == ALL_BITS_ONE)
 		{
 			destination[index] = next_vertex++;
 		}
@@ -56,7 +56,7 @@ size_t meshopt_optimizeVertexFetch(void* destination, datatype_t* indices, size_
 
 		datatype_t& remap = vertex_remap[index];
 
-		if (remap == not_zero) // vertex was not added to destination VB
+		if (remap == ALL_BITS_ONE) // vertex was not added to destination VB
 		{
 			// add vertex
 			memcpy(static_cast<unsigned char*>(destination) + next_vertex * vertex_size, static_cast<const unsigned char*>(vertices) + index * vertex_size, vertex_size);

@@ -12,16 +12,16 @@ static real_t getDelta(const Attr& l, const Attr& r, cgltf_animation_path_type t
 	switch (type)
 	{
 	case cgltf_animation_path_type_translation:
-		return std::max(std::max(fabsf(l.f[0] - r.f[0]), fabsf(l.f[1] - r.f[1])), fabsf(l.f[2] - r.f[2]));
+		return std::max(std::max(std::abs(l.f[0] - r.f[0]), std::abs(l.f[1] - r.f[1])), std::abs(l.f[2] - r.f[2]));
 
 	case cgltf_animation_path_type_rotation:
-		return acosf(std::min(1.f, fabsf(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
+		return acosf(std::min(1.f, std::abs(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
 
 	case cgltf_animation_path_type_scale:
-		return std::max(std::max(fabsf(l.f[0] / r.f[0] - 1), fabsf(l.f[1] / r.f[1] - 1)), fabsf(l.f[2] / r.f[2] - 1));
+		return std::max(std::max(std::abs(l.f[0] / r.f[0] - 1), std::abs(l.f[1] / r.f[1] - 1)), std::abs(l.f[2] / r.f[2] - 1));
 
 	case cgltf_animation_path_type_weights:
-		return fabsf(l.f[0] - r.f[0]);
+		return std::abs(l.f[0] - r.f[0]);
 
 	default:
 		assert(!"Uknown animation path");
@@ -59,7 +59,7 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_anim
 		// We also handle quaternion double-cover
 		real_t ca = l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3];
 
-		real_t d = fabsf(ca);
+		real_t d = std::abs(ca);
 		real_t A = 1.0904f + d * (-3.2452f + d * (3.55645f - d * 1.43519f));
 		real_t B = 0.848013f + d * (-1.06021f + d * 0.215638f);
 		real_t k = A * (t - 0.5f) * (t - 0.5f) + B;
@@ -75,7 +75,7 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_anim
 		    l.f[3] * t0 + r.f[3] * t1,
 		}};
 
-		real_t len = sqrtf(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
+		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
 		if (len > 0.f)
 		{
@@ -119,7 +119,7 @@ static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, c
 
 	if (type == cgltf_animation_path_type_rotation)
 	{
-		real_t len = sqrtf(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
+		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
 		if (len > 0.f)
 		{
@@ -271,7 +271,7 @@ static real_t getWorldScale(cgltf_node* node)
 	real_t a2 = transform[4] * transform[9] - transform[5] * transform[8];
 	real_t det = transform[0] * a0 - transform[1] * a1 + transform[2] * a2;
 
-	return powf(fabsf(det), 1.f / 3.f);
+	return powf(std::abs(det), 1.f / 3.f);
 }
 
 void processAnimation(Animation& animation, const Settings& settings)

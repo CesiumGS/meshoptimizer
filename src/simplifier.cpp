@@ -182,9 +182,9 @@ static void buildPositionRemap(datatype_t* remap, datatype_t* wedge, const real_
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t index = datatype_t(i);
-		datatype_t* entry = hashLookup2(table, table_size, hasher, index, not_zero);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, index, ALL_BITS_ONE);
 
-		if (*entry == not_zero)
+		if (*entry == ALL_BITS_ONE)
 			*entry = index;
 
 		remap[index] = *entry;
@@ -257,7 +257,7 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 	memset(loop, -1, vertex_count * sizeof(datatype_t));
 	memset(loopback, -1, vertex_count * sizeof(datatype_t));
 
-	// incoming & outgoing open edges: not_zero if no open edges, i if there are more than 1
+	// incoming & outgoing open edges: ALL_BITS_ONE if no open edges, i if there are more than 1
 	// note that this is the same data as required in loop[] arrays; loop[] data is only valid for border/seam
 	// but here it's okay to fill the data out for other types of vertices as well
 	datatype_t* openinc = loopback;
@@ -284,8 +284,8 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 			}
 			else if (!hasEdge(adjacency, target, vertex))
 			{
-				openinc[target] = (openinc[target] == not_zero) ? vertex : target;
-				openout[vertex] = (openout[vertex] == not_zero) ? target : vertex;
+				openinc[target] = (openinc[target] == ALL_BITS_ONE) ? vertex : target;
+				openout[vertex] = (openout[vertex] == ALL_BITS_ONE) ? target : vertex;
 			}
 		}
 	}
@@ -306,7 +306,7 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 				// note: we classify any vertices with no open edges as manifold
 				// this is technically incorrect - if 4 triangles share an edge, we'll classify vertices as manifold
 				// it's unclear if this is a problem in practice
-				if (openi == not_zero && openo == not_zero)
+				if (openi == ALL_BITS_ONE && openo == ALL_BITS_ONE)
 				{
 					result[i] = Kind_Manifold;
 				}
@@ -328,8 +328,8 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 				datatype_t openiw = openinc[w], openow = openout[w];
 
 				// seam should have one open half-edge for each vertex, and the edges need to "connect" - point to the same vertex post-remap
-				if (openiv != not_zero && openiv != i && openov != not_zero && openov != i &&
-				    openiw != not_zero && openiw != w && openow != not_zero && openow != w)
+				if (openiv != ALL_BITS_ONE && openiv != i && openov != ALL_BITS_ONE && openov != i &&
+				    openiw != ALL_BITS_ONE && openiw != w && openow != ALL_BITS_ONE && openow != w)
 				{
 					if (remap[openiv] == remap[openow] && remap[openov] == remap[openiw])
 					{
@@ -449,7 +449,7 @@ struct Collapse
 
 static real_t normalize(Vector3& v)
 {
-	real_t length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	real_t length = std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 
 	if (length > 0)
 	{
@@ -501,7 +501,7 @@ static real_t quadricError(const Quadric& Q, const Vector3& v)
 
 	real_t s = Q.w == 0.f ? 0.f : 1.f / Q.w;
 
-	return fabsf(r) * s;
+	return std::abs(r) * s;
 }
 
 static void quadricFromPlane(Quadric& Q, real_t a, real_t b, real_t c, real_t d, real_t w)
@@ -551,8 +551,8 @@ static void quadricFromTriangle(Quadric& Q, const Vector3& p0, const Vector3& p1
 
 	real_t distance = normal.x * p0.x + normal.y * p0.y + normal.z * p0.z;
 
-	// we use sqrtf(area) so that the error is scaled linearly; this tends to improve silhouettes
-	quadricFromPlane(Q, normal.x, normal.y, normal.z, -distance, sqrtf(area) * weight);
+	// we use std::sqrt(area) so that the error is scaled linearly; this tends to improve silhouettes
+	quadricFromPlane(Q, normal.x, normal.y, normal.z, -distance, std::sqrt(area) * weight);
 }
 
 static void quadricFromTriangleEdge(Quadric& Q, const Vector3& p0, const Vector3& p1, const Vector3& p2, real_t weight)
@@ -791,7 +791,7 @@ static void dumpEdgeCollapses(const Collapse* collapses, size_t collapse_count, 
 	for (int k0 = 0; k0 < Kind_Count; ++k0)
 		for (int k1 = 0; k1 < Kind_Count; ++k1)
 			if (ckinds[k0][k1])
-				printf("collapses %d -> %d: %d, min error %e\n", k0, k1, int(ckinds[k0][k1]), ckinds[k0][k1] ? sqrtf(cerrors[k0][k1]) : 0.f);
+				printf("collapses %d -> %d: %d, min error %e\n", k0, k1, int(ckinds[k0][k1]), ckinds[k0][k1] ? std::sqrt(cerrors[k0][k1]) : 0.f);
 }
 
 static void dumpLockedCollapses(const datatype_t* indices, size_t index_count, const unsigned char* vertex_kind)
@@ -965,7 +965,7 @@ static size_t performEdgeCollapses(datatype_t* collapse_remap, unsigned char* co
 	real_t error_goal_perfect = edge_collapse_goal < collapse_count ? collapses[collapse_order[edge_collapse_goal]].error : 0.f;
 
 	printf("removed %d triangles, error %e (goal %e); evaluated %d/%d collapses (done %d, skipped %d, invalid %d)\n",
-	    int(triangle_collapses), sqrtf(result_error), sqrtf(error_goal_perfect),
+	    int(triangle_collapses), std::sqrt(result_error), std::sqrt(error_goal_perfect),
 	    int(stats[0]), int(collapse_count), int(edge_collapses), int(stats[1]), int(stats[2]));
 #endif
 
@@ -1003,7 +1003,7 @@ static void remapEdgeLoops(datatype_t* loop, size_t vertex_count, const datatype
 {
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		if (loop[i] != not_zero)
+		if (loop[i] != ALL_BITS_ONE)
 		{
 			datatype_t l = loop[i];
 			datatype_t r = collapse_remap[l];
@@ -1118,9 +1118,9 @@ static size_t fillVertexCells(datatype_t* table, size_t table_size, datatype_t* 
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), not_zero);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), ALL_BITS_ONE);
 
-		if (*entry == not_zero)
+		if (*entry == ALL_BITS_ONE)
 		{
 			*entry = datatype_t(i);
 			vertex_cells[i] = datatype_t(result++);
@@ -1145,9 +1145,9 @@ static size_t countVertexCells(datatype_t* table, size_t table_size, const datat
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t id = vertex_ids[i];
-		datatype_t* entry = hashLookup2(table, table_size, hasher, id, not_zero);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, id, ALL_BITS_ONE);
 
-		result += (*entry == not_zero);
+		result += (*entry == ALL_BITS_ONE);
 		*entry = id;
 	}
 
@@ -1207,7 +1207,7 @@ static void fillCellRemap(datatype_t* cell_remap, real_t* cell_errors, size_t ce
 		datatype_t cell = vertex_cells[i];
 		real_t error = quadricError(cell_quadrics[cell], vertex_positions[i]);
 
-		if (cell_remap[cell] == not_zero || cell_errors[cell] > error)
+		if (cell_remap[cell] == ALL_BITS_ONE || cell_errors[cell] > error)
 		{
 			cell_remap[cell] = datatype_t(i);
 			cell_errors[cell] = error;
@@ -1250,9 +1250,9 @@ static size_t filterTriangles(datatype_t* destination, datatype_t* tritable, siz
 			destination[result * 3 + 1] = b;
 			destination[result * 3 + 2] = c;
 
-			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), not_zero);
+			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), ALL_BITS_ONE);
 
-			if (*entry == not_zero)
+			if (*entry == ALL_BITS_ONE)
 				*entry = datatype_t(result++);
 		}
 	}
@@ -1395,7 +1395,7 @@ size_t meshopt_simplify(datatype_t* destination, const datatype_t* indices, size
 	}
 
 #if TRACE
-	printf("result: %d triangles, error: %e; total %d passes\n", int(result_count), sqrtf(result_error), int(pass_count));
+	printf("result: %d triangles, error: %e; total %d passes\n", int(result_count), std::sqrt(result_error), int(pass_count));
 #endif
 
 #if TRACE > 1
@@ -1415,7 +1415,7 @@ size_t meshopt_simplify(datatype_t* destination, const datatype_t* indices, size
 
 	// result_error is quadratic; we need to remap it back to linear
 	if (out_result_error)
-		*out_result_error = sqrtf(result_error);
+		*out_result_error = std::sqrt(result_error);
 
 	return result_count;
 }
@@ -1461,7 +1461,7 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 	}
 
 	// instead of starting in the middle, let's guess as to what the answer might be! triangle count usually grows as a square of grid size...
-	int next_grid_size = int(sqrtf(real_t(target_cell_count)) + 0.5f);
+	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5f);
 
 	for (int pass = 0; pass < 10 + kInterpolationPasses; ++pass)
 	{
@@ -1543,11 +1543,11 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 	size_t write = filterTriangles(destination, tritable, tritable_size, indices, index_count, vertex_cells, cell_remap);
 
 #if TRACE
-	printf("result: %d cells, %d triangles (%d unfiltered), error %e\n", int(cell_count), int(write / 3), int(min_triangles), sqrtf(result_error));
+	printf("result: %d cells, %d triangles (%d unfiltered), error %e\n", int(cell_count), int(write / 3), int(min_triangles), std::sqrt(result_error));
 #endif
 
 	if (out_result_error)
-		*out_result_error = sqrtf(result_error);
+		*out_result_error = std::sqrt(result_error);
 
 	return write;
 }
@@ -1590,7 +1590,7 @@ size_t meshopt_simplifyPoints(datatype_t* destination, const real_t* vertex_posi
 	size_t max_vertices = vertex_count;
 
 	// instead of starting in the middle, let's guess as to what the answer might be! triangle count usually grows as a square of grid size...
-	int next_grid_size = int(sqrtf(real_t(target_cell_count)) + 0.5f);
+	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5f);
 
 	for (int pass = 0; pass < 10 + kInterpolationPasses; ++pass)
 	{

@@ -41,12 +41,16 @@ extern "C" {
 #ifdef MESHOPTIMIZER_64BIT
 using datatype_t =  uint64_t;
 using real_t     =  double;
+constexpr size_t NUM_BITS = 64;
+
 #else
 using datatype_t =  uint32_t;
 using real_t     =  float;
+
+constexpr size_t NUM_BITS = 32;
 #endif
 
-constexpr datatype_t not_zero = ~datatype_t(0);
+constexpr datatype_t ALL_BITS_ONE = ~datatype_t(0);
 
 /**
  * Vertex attribute stream

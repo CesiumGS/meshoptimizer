@@ -65,7 +65,7 @@ extern "C" void* memcpy(void* destination, const void* source, size_t num)
 
 extern "C" void* memset(void* ptr, int value, size_t num)
 {
-	uint32_t v32 = not_zero / 255 * uint8_t(value);
+	uint32_t v32 = ALL_BITS_ONE / 255 * uint8_t(value);
 
 	char* d = (char*)ptr;
 

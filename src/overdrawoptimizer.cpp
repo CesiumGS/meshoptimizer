@@ -52,7 +52,7 @@ static void calculateSortData(real_t* sort_data, const datatype_t* indices, size
 			real_t normaly = p10[2] * p20[0] - p10[0] * p20[2];
 			real_t normalz = p10[0] * p20[1] - p10[1] * p20[0];
 
-			real_t area = sqrtf(normalx * normalx + normaly * normaly + normalz * normalz);
+			real_t area = std::sqrt(normalx * normalx + normaly * normaly + normalz * normalz);
 
 			cluster_centroid[0] += (p0[0] + p1[0] + p2[0]) * (area / 3);
 			cluster_centroid[1] += (p0[1] + p1[1] + p2[1]) * (area / 3);
@@ -69,7 +69,7 @@ static void calculateSortData(real_t* sort_data, const datatype_t* indices, size
 		cluster_centroid[1] *= inv_cluster_area;
 		cluster_centroid[2] *= inv_cluster_area;
 
-		real_t cluster_normal_length = sqrtf(cluster_normal[0] * cluster_normal[0] + cluster_normal[1] * cluster_normal[1] + cluster_normal[2] * cluster_normal[2]);
+		real_t cluster_normal_length = std::sqrt(cluster_normal[0] * cluster_normal[0] + cluster_normal[1] * cluster_normal[1] + cluster_normal[2] * cluster_normal[2]);
 		real_t inv_cluster_normal_length = cluster_normal_length == 0 ? 0 : 1 / cluster_normal_length;
 
 		cluster_normal[0] *= inv_cluster_normal_length;
@@ -89,7 +89,7 @@ static void calculateSortOrderRadix(datatype_t* sort_order, const real_t* sort_d
 
 	for (size_t i = 0; i < cluster_count; ++i)
 	{
-		real_t dpa = fabsf(sort_data[i]);
+		real_t dpa = std::abs(sort_data[i]);
 
 		sort_data_max = (sort_data_max < dpa) ? dpa : sort_data_max;
 	}

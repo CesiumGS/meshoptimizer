@@ -56,7 +56,7 @@ static void transformNormal(real_t* res, const real_t* ptr, const real_t* transf
 	real_t y = ptr[0] * transform[1] + ptr[1] * transform[5] + ptr[2] * transform[9];
 	real_t z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10];
 
-	real_t l = sqrtf(x * x + y * y + z * z);
+	real_t l = std::sqrt(x * x + y * y + z * z);
 	real_t s = (l == 0.f) ? 0.f : 1 / l;
 
 	res[0] = x * s;
@@ -394,7 +394,7 @@ static bool hasDeltas(const std::vector<Attr>& data)
 	{
 		const Attr& a = data[i];
 
-		if (fabsf(a.f[0]) > threshold || fabsf(a.f[1]) > threshold || fabsf(a.f[2]) > threshold)
+		if (std::abs(a.f[0]) > threshold || std::abs(a.f[1]) > threshold || std::abs(a.f[2]) > threshold)
 			return true;
 	}
 
@@ -860,13 +860,13 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, real_t ratio)
 	for (size_t i = 0; i < vertex_count; ++i)
 		if (live[i] && (kind[i] == 1 || kind[i] == 2))
 		{
-			if (loop[i] != not_zero && live[loop[i]])
+			if (loop[i] != ALL_BITS_ONE && live[loop[i]])
 			{
 				loops.indices.push_back(datatype_t(i));
 				loops.indices.push_back(loop[i]);
 			}
 
-			if (loopback[i] != not_zero && live[loopback[i]])
+			if (loopback[i] != ALL_BITS_ONE && live[loopback[i]])
 			{
 				loops.indices.push_back(loopback[i]);
 				loops.indices.push_back(datatype_t(i));

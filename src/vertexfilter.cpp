@@ -1,7 +1,7 @@
 // This file is part of meshoptimizer library; see meshoptimizer.h for version/license details
 #include "meshoptimizer.h"
 
-#include <math.h>
+#include <cmath>
 #include <string.h>
 
 // The block below auto-detects SIMD ISA that can be used on the target platform
@@ -77,7 +77,7 @@ static void decodeFilterOct(T* data, size_t count)
 		// convert x and y to real_ts and reconstruct z; this assumes zf encodes 1.f at the same bit count
 		real_t x = real_t(data[i * 4 + 0]);
 		real_t y = real_t(data[i * 4 + 1]);
-		real_t z = real_t(data[i * 4 + 2]) - fabsf(x) - fabsf(y);
+		real_t z = real_t(data[i * 4 + 2]) - std::abs(x) - std::abs(y);
 
 		// fixup octahedral coordinates for z<0
 		real_t t = (z >= 0.f) ? 0.f : z;
@@ -86,7 +86,7 @@ static void decodeFilterOct(T* data, size_t count)
 		y += (y >= 0.f) ? t : -t;
 
 		// compute normal length & scale
-		real_t l = sqrtf(x * x + y * y + z * z);
+		real_t l = std::sqrt(x * x + y * y + z * z);
 		real_t s = max / l;
 
 		// rounded signed real_t->int
@@ -102,7 +102,7 @@ static void decodeFilterOct(T* data, size_t count)
 
 static void decodeFilterQuat(short* data, size_t count)
 {
-	const real_t scale = 1.f / sqrtf(2.f);
+	const real_t scale = 1.f / std::sqrt(2.f);
 
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -117,7 +117,7 @@ static void decodeFilterQuat(short* data, size_t count)
 
 		// reconstruct w as a square root; we clamp to 0.f to avoid NaN due to precision errors
 		real_t ww = 1.f - x * x - y * y - z * z;
-		real_t w = sqrtf(ww >= 0.f ? ww : 0.f);
+		real_t w = std::sqrt(ww >= 0.f ? ww : 0.f);
 
 		// rounded signed real_t->int
 		int xf = int(x * 32767.f + (x >= 0.f ? 0.5f : -0.5f));
@@ -300,7 +300,7 @@ static void decodeFilterOctSimd(short* data, size_t count)
 
 static void decodeFilterQuatSimd(short* data, size_t count)
 {
-	const real_t scale = 1.f / sqrtf(2.f);
+	const real_t scale = 1.f / std::sqrt(2.f);
 
 	for (size_t i = 0; i < count; i += 4)
 	{
@@ -512,7 +512,7 @@ static void decodeFilterOctSimd(short* data, size_t count)
 
 static void decodeFilterQuatSimd(short* data, size_t count)
 {
-	const real_t scale = 1.f / sqrtf(2.f);
+	const real_t scale = 1.f / std::sqrt(2.f);
 
 	for (size_t i = 0; i < count; i += 4)
 	{
@@ -706,7 +706,7 @@ static void decodeFilterOctSimd(short* data, size_t count)
 
 static void decodeFilterQuatSimd(short* data, size_t count)
 {
-	const real_t scale = 1.f / sqrtf(2.f);
+	const real_t scale = 1.f / std::sqrt(2.f);
 
 	for (size_t i = 0; i < count; i += 4)
 	{
@@ -855,14 +855,14 @@ void meshopt_encodeFilterOct(void* destination, size_t count, size_t stride, int
 
 		// octahedral encoding of a unit vector
 		real_t nx = n[0], ny = n[1], nz = n[2], nw = n[3];
-		real_t nl = fabsf(nx) + fabsf(ny) + fabsf(nz);
+		real_t nl = std::abs(nx) + std::abs(ny) + std::abs(nz);
 		real_t ns = nl == 0.f ? 0.f : 1.f / nl;
 
 		nx *= ns;
 		ny *= ns;
 
-		real_t u = (nz >= 0.f) ? nx : (1 - fabsf(ny)) * (nx >= 0.f ? 1.f : -1.f);
-		real_t v = (nz >= 0.f) ? ny : (1 - fabsf(nx)) * (ny >= 0.f ? 1.f : -1.f);
+		real_t u = (nz >= 0.f) ? nx : (1 - std::abs(ny)) * (nx >= 0.f ? 1.f : -1.f);
+		real_t v = (nz >= 0.f) ? ny : (1 - std::abs(nx)) * (ny >= 0.f ? 1.f : -1.f);
 
 		int fu = meshopt_quantizeSnorm(u, bits);
 		int fv = meshopt_quantizeSnorm(v, bits);
@@ -894,7 +894,7 @@ void meshopt_encodeFilterQuat(void* destination_, size_t count, size_t stride, i
 
 	short* destination = static_cast<short*>(destination_);
 
-	const real_t scaler = sqrtf(2.f);
+	const real_t scaler = std::sqrt(2.0);
 
 	for (size_t i = 0; i < count; ++i)
 	{
@@ -903,9 +903,9 @@ void meshopt_encodeFilterQuat(void* destination_, size_t count, size_t stride, i
 
 		// establish maximum quaternion component
 		int qc = 0;
-		qc = fabsf(q[1]) > fabsf(q[qc]) ? 1 : qc;
-		qc = fabsf(q[2]) > fabsf(q[qc]) ? 2 : qc;
-		qc = fabsf(q[3]) > fabsf(q[qc]) ? 3 : qc;
+		qc = std::abs(q[1]) > std::abs(q[qc]) ? 1 : qc;
+		qc = std::abs(q[2]) > std::abs(q[qc]) ? 2 : qc;
+		qc = std::abs(q[3]) > std::abs(q[qc]) ? 3 : qc;
 
 		// we use double-cover properties to discard the sign
 		real_t sign = q[qc] < 0.f ? -1.f : 1.f;
