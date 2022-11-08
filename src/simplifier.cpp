@@ -182,7 +182,7 @@ static void buildPositionRemap(datatype_t* remap, datatype_t* wedge, const float
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t index = datatype_t(i);
-		datatype_t* entry = hashLookup2(table, table_size, hasher, index, ~0u);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, index, ~datatype_t(0u));
 
 		if (*entry == ~0u)
 			*entry = index;
@@ -1118,7 +1118,7 @@ static size_t fillVertexCells(datatype_t* table, size_t table_size, datatype_t* 
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), ~0u);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), ~datatype_t(0u));
 
 		if (*entry == ~0u)
 		{
@@ -1145,7 +1145,7 @@ static size_t countVertexCells(datatype_t* table, size_t table_size, const datat
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t id = vertex_ids[i];
-		datatype_t* entry = hashLookup2(table, table_size, hasher, id, ~0u);
+		datatype_t* entry = hashLookup2(table, table_size, hasher, id, ~datatype_t(0u));
 
 		result += (*entry == ~0u);
 		*entry = id;
@@ -1250,7 +1250,7 @@ static size_t filterTriangles(datatype_t* destination, datatype_t* tritable, siz
 			destination[result * 3 + 1] = b;
 			destination[result * 3 + 2] = c;
 
-			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), ~0u);
+			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), ~datatype_t(0u));
 
 			if (*entry == ~0u)
 				*entry = datatype_t(result++);

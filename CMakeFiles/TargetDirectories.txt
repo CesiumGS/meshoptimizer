@@ -1,0 +1,7 @@
+/home/benedetto/src/b73meshopt/CMakeFiles/meshoptimizer.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/edit_cache.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/rebuild_cache.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/list_install_components.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/install.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/install/local.dir
+/home/benedetto/src/b73meshopt/CMakeFiles/install/strip.dir
