@@ -832,7 +832,7 @@ static void sortEdgeCollapses(datatype_t* sort_order, const Collapse* collapses,
 	for (size_t i = 0; i < collapse_count; ++i)
 	{
 		// skip sign bit since error is non-negative
-		datatype_t key = (collapses[i].errorui << 1) >> (32 - sort_bits);
+		datatype_t key = (collapses[i].errorui << 1) >> (NUM_BITS - sort_bits);
 
 		histogram[key]++;
 	}
@@ -853,7 +853,7 @@ static void sortEdgeCollapses(datatype_t* sort_order, const Collapse* collapses,
 	for (size_t i = 0; i < collapse_count; ++i)
 	{
 		// skip sign bit since error is non-negative
-		datatype_t key = (collapses[i].errorui << 1) >> (32 - sort_bits);
+		datatype_t key = (collapses[i].errorui << 1) >> (NUM_BITS - sort_bits);
 
 		sort_order[histogram[key]++] = datatype_t(i);
 	}
