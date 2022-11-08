@@ -1272,7 +1272,7 @@ int main(int argc, char** argv)
 		{
 			settings.texture_ktx2 = true;
 
-			datatype_t mask = ~0u;
+			datatype_t mask = not_zero;
 			if (i + 1 < argc && isalpha(argv[i + 1][0]))
 				mask = textureMask(argv[++i]);
 
@@ -1284,7 +1284,7 @@ int main(int argc, char** argv)
 		{
 			settings.texture_ktx2 = true;
 
-			datatype_t mask = ~0u;
+			datatype_t mask = not_zero;
 			if (i + 1 < argc && isalpha(argv[i + 1][0]))
 				mask = textureMask(argv[++i]);
 

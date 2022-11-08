@@ -295,8 +295,8 @@ struct KDNode
 
 	// leaves: axis = 3, children = number of extra points after this one (0 if 'index' is the only point)
 	// branches: axis != 3, left subtree = skip 1, right subtree = skip 1+children
-	datatype_t axis : 2;
-	datatype_t children : 30;
+	unsigned axis : 2;
+	unsigned children : 30;
 };
 
 static size_t kdtreePartition(datatype_t* indices, size_t count, const real_t* points, size_t stride, datatype_t axis, real_t pivot)
@@ -513,7 +513,7 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 
 	for (;;)
 	{
-		datatype_t best_triangle = ~0u;
+		datatype_t best_triangle = not_zero;
 		datatype_t best_extra = 5;
 		real_t best_score = std::numeric_limits<real_t>::max();
 
@@ -572,10 +572,10 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 			}
 		}
 
-		if (best_triangle == ~0u)
+		if (best_triangle == not_zero)
 		{
 			real_t position[3] = {meshlet_cone.px, meshlet_cone.py, meshlet_cone.pz};
-			datatype_t index = ~0u;
+			datatype_t index = not_zero;
 			real_t limit = std::numeric_limits<real_t>::max();
 
 			kdtreeNearest(nodes, 0, &triangles[0].px, sizeof(Cone) / sizeof(real_t), emitted_flags, position, index, limit);
@@ -583,7 +583,7 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 			best_triangle = index;
 		}
 
-		if (best_triangle == ~0u)
+		if (best_triangle == not_zero)
 			break;
 
 		datatype_t a = indices[best_triangle * 3 + 0], b = indices[best_triangle * 3 + 1], c = indices[best_triangle * 3 + 2];

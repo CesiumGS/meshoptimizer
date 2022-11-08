@@ -760,7 +760,7 @@ void encodeVertex(const Mesh& mesh, const char* pvn)
 
 void stripify(const Mesh& mesh, bool use_restart, char desc)
 {
-	datatype_t restart_index = use_restart ? ~0u : 0;
+	datatype_t restart_index = use_restart ? not_zero : 0;
 
 	// note: input mesh is assumed to be optimized for vertex cache and vertex fetch
 	double start = timestamp();

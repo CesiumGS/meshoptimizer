@@ -46,6 +46,7 @@ using datatype_t =  uint32_t;
 using real_t     =  float;
 #endif
 
+constexpr datatype_t not_zero = ~datatype_t(0);
 
 /**
  * Vertex attribute stream

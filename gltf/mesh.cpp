@@ -860,13 +860,13 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, real_t ratio)
 	for (size_t i = 0; i < vertex_count; ++i)
 		if (live[i] && (kind[i] == 1 || kind[i] == 2))
 		{
-			if (loop[i] != ~0u && live[loop[i]])
+			if (loop[i] != not_zero && live[loop[i]])
 			{
 				loops.indices.push_back(datatype_t(i));
 				loops.indices.push_back(loop[i]);
 			}
 
-			if (loopback[i] != ~0u && live[loopback[i]])
+			if (loopback[i] != not_zero && live[loopback[i]])
 			{
 				loops.indices.push_back(loopback[i]);
 				loops.indices.push_back(datatype_t(i));

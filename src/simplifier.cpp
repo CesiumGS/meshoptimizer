@@ -182,9 +182,9 @@ static void buildPositionRemap(datatype_t* remap, datatype_t* wedge, const real_
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t index = datatype_t(i);
-		datatype_t* entry = hashLookup2(table, table_size, hasher, index, ~datatype_t(0u));
+		datatype_t* entry = hashLookup2(table, table_size, hasher, index, not_zero);
 
-		if (*entry == ~0u)
+		if (*entry == not_zero)
 			*entry = index;
 
 		remap[index] = *entry;
@@ -257,7 +257,7 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 	memset(loop, -1, vertex_count * sizeof(datatype_t));
 	memset(loopback, -1, vertex_count * sizeof(datatype_t));
 
-	// incoming & outgoing open edges: ~0u if no open edges, i if there are more than 1
+	// incoming & outgoing open edges: not_zero if no open edges, i if there are more than 1
 	// note that this is the same data as required in loop[] arrays; loop[] data is only valid for border/seam
 	// but here it's okay to fill the data out for other types of vertices as well
 	datatype_t* openinc = loopback;
@@ -284,8 +284,8 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 			}
 			else if (!hasEdge(adjacency, target, vertex))
 			{
-				openinc[target] = (openinc[target] == ~0u) ? vertex : target;
-				openout[vertex] = (openout[vertex] == ~0u) ? target : vertex;
+				openinc[target] = (openinc[target] == not_zero) ? vertex : target;
+				openout[vertex] = (openout[vertex] == not_zero) ? target : vertex;
 			}
 		}
 	}
@@ -306,7 +306,7 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 				// note: we classify any vertices with no open edges as manifold
 				// this is technically incorrect - if 4 triangles share an edge, we'll classify vertices as manifold
 				// it's unclear if this is a problem in practice
-				if (openi == ~0u && openo == ~0u)
+				if (openi == not_zero && openo == not_zero)
 				{
 					result[i] = Kind_Manifold;
 				}
@@ -328,8 +328,8 @@ static void classifyVertices(unsigned char* result, datatype_t* loop, datatype_t
 				datatype_t openiw = openinc[w], openow = openout[w];
 
 				// seam should have one open half-edge for each vertex, and the edges need to "connect" - point to the same vertex post-remap
-				if (openiv != ~0u && openiv != i && openov != ~0u && openov != i &&
-				    openiw != ~0u && openiw != w && openow != ~0u && openow != w)
+				if (openiv != not_zero && openiv != i && openov != not_zero && openov != i &&
+				    openiw != not_zero && openiw != w && openow != not_zero && openow != w)
 				{
 					if (remap[openiv] == remap[openow] && remap[openov] == remap[openiw])
 					{
@@ -1003,7 +1003,7 @@ static void remapEdgeLoops(datatype_t* loop, size_t vertex_count, const datatype
 {
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		if (loop[i] != ~0u)
+		if (loop[i] != not_zero)
 		{
 			datatype_t l = loop[i];
 			datatype_t r = collapse_remap[l];
@@ -1118,9 +1118,9 @@ static size_t fillVertexCells(datatype_t* table, size_t table_size, datatype_t* 
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), ~datatype_t(0u));
+		datatype_t* entry = hashLookup2(table, table_size, hasher, datatype_t(i), not_zero);
 
-		if (*entry == ~0u)
+		if (*entry == not_zero)
 		{
 			*entry = datatype_t(i);
 			vertex_cells[i] = datatype_t(result++);
@@ -1145,9 +1145,9 @@ static size_t countVertexCells(datatype_t* table, size_t table_size, const datat
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t id = vertex_ids[i];
-		datatype_t* entry = hashLookup2(table, table_size, hasher, id, ~datatype_t(0u));
+		datatype_t* entry = hashLookup2(table, table_size, hasher, id, not_zero);
 
-		result += (*entry == ~0u);
+		result += (*entry == not_zero);
 		*entry = id;
 	}
 
@@ -1207,7 +1207,7 @@ static void fillCellRemap(datatype_t* cell_remap, real_t* cell_errors, size_t ce
 		datatype_t cell = vertex_cells[i];
 		real_t error = quadricError(cell_quadrics[cell], vertex_positions[i]);
 
-		if (cell_remap[cell] == ~0u || cell_errors[cell] > error)
+		if (cell_remap[cell] == not_zero || cell_errors[cell] > error)
 		{
 			cell_remap[cell] = datatype_t(i);
 			cell_errors[cell] = error;
@@ -1250,9 +1250,9 @@ static size_t filterTriangles(datatype_t* destination, datatype_t* tritable, siz
 			destination[result * 3 + 1] = b;
 			destination[result * 3 + 2] = c;
 
-			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), ~datatype_t(0u));
+			datatype_t* entry = hashLookup2(tritable, tritable_size, hasher, datatype_t(result), not_zero);
 
-			if (*entry == ~0u)
+			if (*entry == not_zero)
 				*entry = datatype_t(result++);
 		}
 	}

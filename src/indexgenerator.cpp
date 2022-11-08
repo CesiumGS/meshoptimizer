@@ -171,9 +171,9 @@ static void buildPositionRemap(datatype_t* remap, const real_t* vertex_positions
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		datatype_t index = datatype_t(i);
-		datatype_t* entry = hashLookup(vertex_table, vertex_table_size, vertex_hasher, index, ~datatype_t(0u));
+		datatype_t* entry = hashLookup(vertex_table, vertex_table_size, vertex_hasher, index, not_zero);
 
-		if (*entry == ~0u)
+		if (*entry == not_zero)
 			*entry = index;
 
 		remap[index] = *entry;
@@ -207,11 +207,11 @@ size_t meshopt_generateVertexRemap(datatype_t* destination, const datatype_t* in
 		datatype_t index = indices ? indices[i] : datatype_t(i);
 		assert(index < vertex_count);
 
-		if (destination[index] == ~0u)
+		if (destination[index] == not_zero)
 		{
-			datatype_t* entry = hashLookup(table, table_size, hasher, index, ~datatype_t(0u));
+			datatype_t* entry = hashLookup(table, table_size, hasher, index, not_zero);
 
-			if (*entry == ~0u)
+			if (*entry == not_zero)
 			{
 				*entry = index;
 
@@ -219,7 +219,7 @@ size_t meshopt_generateVertexRemap(datatype_t* destination, const datatype_t* in
 			}
 			else
 			{
-				assert(destination[*entry] != ~0u);
+				assert(destination[*entry] != not_zero);
 
 				destination[index] = destination[*entry];
 			}
@@ -262,11 +262,11 @@ size_t meshopt_generateVertexRemapMulti(datatype_t* destination, const datatype_
 		datatype_t index = indices ? indices[i] : datatype_t(i);
 		assert(index < vertex_count);
 
-		if (destination[index] == ~0u)
+		if (destination[index] == not_zero)
 		{
-			datatype_t* entry = hashLookup(table, table_size, hasher, index, ~datatype_t(0u));
+			datatype_t* entry = hashLookup(table, table_size, hasher, index, not_zero);
 
-			if (*entry == ~0u)
+			if (*entry == not_zero)
 			{
 				*entry = index;
 
@@ -274,7 +274,7 @@ size_t meshopt_generateVertexRemapMulti(datatype_t* destination, const datatype_
 			}
 			else
 			{
-				assert(destination[*entry] != ~0u);
+				assert(destination[*entry] != not_zero);
 
 				destination[index] = destination[*entry];
 			}
@@ -302,7 +302,7 @@ void meshopt_remapVertexBuffer(void* destination, const void* vertices, size_t v
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		if (remap[i] != ~0u)
+		if (remap[i] != not_zero)
 		{
 			assert(remap[i] < vertex_count);
 
@@ -318,7 +318,7 @@ void meshopt_remapIndexBuffer(datatype_t* destination, const datatype_t* indices
 	for (size_t i = 0; i < index_count; ++i)
 	{
 		datatype_t index = indices ? indices[i] : datatype_t(i);
-		assert(remap[index] != ~0u);
+		assert(remap[index] != not_zero);
 
 		destination[i] = remap[index];
 	}
@@ -349,11 +349,11 @@ void meshopt_generateShadowIndexBuffer(datatype_t* destination, const datatype_t
 		datatype_t index = indices[i];
 		assert(index < vertex_count);
 
-		if (remap[index] == ~0u)
+		if (remap[index] == not_zero)
 		{
-			datatype_t* entry = hashLookup(table, table_size, hasher, index, ~datatype_t(0u));
+			datatype_t* entry = hashLookup(table, table_size, hasher, index, not_zero);
 
-			if (*entry == ~0u)
+			if (*entry == not_zero)
 				*entry = index;
 
 			remap[index] = *entry;
@@ -393,11 +393,11 @@ void meshopt_generateShadowIndexBufferMulti(datatype_t* destination, const datat
 		datatype_t index = indices[i];
 		assert(index < vertex_count);
 
-		if (remap[index] == ~0u)
+		if (remap[index] == not_zero)
 		{
-			datatype_t* entry = hashLookup(table, table_size, hasher, index, ~datatype_t(0u));
+			datatype_t* entry = hashLookup(table, table_size, hasher, index, not_zero);
 
-			if (*entry == ~0u)
+			if (*entry == not_zero)
 				*entry = index;
 
 			remap[index] = *entry;
