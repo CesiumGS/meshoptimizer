@@ -2,7 +2,7 @@
 #include "meshoptimizer.h"
 
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 #include <string.h>
 
 // This work is based on:
