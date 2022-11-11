@@ -59,7 +59,7 @@
  * to compute the root-to-node transformation.
  *
  * `cgltf_accessor_unpack_real_ts` reads in the data from an accessor, applies sparse data (if any),
- * and converts them to real_ting point. Assumes that `cgltf_load_buffers` has already been called.
+ * and converts them to floating point. Assumes that `cgltf_load_buffers` has already been called.
  * By passing null for the output pointer, users can find out how many real_ts are required in the
  * output buffer.
  *
