@@ -723,7 +723,7 @@ static void decodeFilterQuatSimd(short* data, size_t count)
 		v128_t zf = wasm_i32x4_shr(wasm_i32x4_shl(q4_zc, 16), 16);
 		v128_t cf = wasm_i32x4_shr(q4_zc, 16);
 
-		// get a real_ting-point scaler using zc with bottom 2 bits set to 1 (which represents 1.f)
+		// get a floating-point scaler using zc with bottom 2 bits set to 1 (which represents 1.f)
 		v128_t sf = wasm_v128_or(cf, wasm_i32x4_splat(3));
 		v128_t ss = wasm_f32x4_div(wasm_f32x4_splat(scale), wasm_f32x4_convert_i32x4(sf));
 
