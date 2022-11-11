@@ -581,7 +581,7 @@ static void decodeFilterExpSimd(datatype_t* data, size_t count)
 		int32x4_t ef = vshrq_n_s32(v, 24);
 		int32x4_t es = vshlq_n_s32(vaddq_s32(ef, vdupq_n_s32(127)), 23);
 
-		// decode 24-bit mantissa into real_ting-point value
+		// decode 24-bit mantissa into floating-point value
 		int32x4_t mf = vshrq_n_s32(vshlq_n_s32(v, 8), 8);
 		real_t32x4_t m = vcvtq_f32_s32(mf);
 
