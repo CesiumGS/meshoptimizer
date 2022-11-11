@@ -68,7 +68,7 @@
  * the necessary amount of memory.
  *
  * `cgltf_accessor_read_real_t` reads a certain element from a non-sparse accessor and converts it to
- * real_ting point, assuming that `cgltf_load_buffers` has already been called. The passed-in element
+ * floating point, assuming that `cgltf_load_buffers` has already been called. The passed-in element
  * size is the number of real_ts in the output buffer, which should be in the range [1, 16]. Returns
  * false if the passed-in element_size is too small, or if the accessor is sparse.
  *
