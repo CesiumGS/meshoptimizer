@@ -780,7 +780,7 @@ static void decodeFilterExpSimd(datatype_t* data, size_t count)
 		v128_t ef = wasm_i32x4_shr(v, 24);
 		v128_t es = wasm_i32x4_shl(wasm_i32x4_add(ef, wasm_i32x4_splat(127)), 23);
 
-		// decode 24-bit mantissa into real_ting-point value
+		// decode 24-bit mantissa into floating-point value
 		v128_t mf = wasm_i32x4_shr(wasm_i32x4_shl(v, 8), 8);
 		v128_t m = wasm_f32x4_convert_i32x4(mf);
 
