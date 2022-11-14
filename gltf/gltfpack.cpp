@@ -1446,7 +1446,7 @@ int main(int argc, char** argv)
 			fprintf(stderr, "\nVertex positions:\n");
 			fprintf(stderr, "\t-vpi: use integer attributes for positions (default)\n");
 			fprintf(stderr, "\t-vpn: use normalized attributes for positions\n");
-			fprintf(stderr, "\t-vpf: use real_ting point attributes for positions\n");
+			fprintf(stderr, "\t-vpf: use floating point attributes for positions\n");
 			fprintf(stderr, "\nAnimations:\n");
 			fprintf(stderr, "\t-at N: use N-bit quantization for translations (default: 16; N should be between 1 and 24)\n");
 			fprintf(stderr, "\t-ar N: use N-bit quantization for rotations (default: 12; N should be between 4 and 16)\n");

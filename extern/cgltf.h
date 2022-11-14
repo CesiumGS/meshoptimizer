@@ -59,7 +59,7 @@
  * to compute the root-to-node transformation.
  *
  * `cgltf_accessor_unpack_real_ts` reads in the data from an accessor, applies sparse data (if any),
- * and converts them to real_ting point. Assumes that `cgltf_load_buffers` has already been called.
+ * and converts them to floating point. Assumes that `cgltf_load_buffers` has already been called.
  * By passing null for the output pointer, users can find out how many real_ts are required in the
  * output buffer.
  *
@@ -68,16 +68,16 @@
  * the necessary amount of memory.
  *
  * `cgltf_accessor_read_real_t` reads a certain element from a non-sparse accessor and converts it to
- * real_ting point, assuming that `cgltf_load_buffers` has already been called. The passed-in element
+ * floating point, assuming that `cgltf_load_buffers` has already been called. The passed-in element
  * size is the number of real_ts in the output buffer, which should be in the range [1, 16]. Returns
  * false if the passed-in element_size is too small, or if the accessor is sparse.
  *
- * `cgltf_accessor_read_uint` is similar to its real_ting-point counterpart, but limited to reading
+ * `cgltf_accessor_read_uint` is similar to its floating-point counterpart, but limited to reading
  * vector types and does not support matrix types. The passed-in element size is the number of uints
  * in the output buffer, which should be in the range [1, 4]. Returns false if the passed-in
  * element_size is too small, or if the accessor is sparse.
  *
- * `cgltf_accessor_read_index` is similar to its real_ting-point counterpart, but it returns size_t
+ * `cgltf_accessor_read_index` is similar to its floating-point counterpart, but it returns size_t
  * and only works with single-component data types.
  *
  * `cgltf_copy_extras_json` allows users to retrieve the "extras" data that can be attached to many

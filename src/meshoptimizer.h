@@ -42,11 +42,9 @@ extern "C" {
 using datatype_t =  uint64_t;
 using real_t     =  double;
 constexpr size_t NUM_BITS = 64;
-
 #else
 using datatype_t =  uint32_t;
 using real_t     =  float;
-
 constexpr size_t NUM_BITS = 32;
 #endif
 
@@ -300,7 +298,7 @@ MESHOPTIMIZER_API int meshopt_decodeVertexBuffer(void* destination, size_t verte
  * meshopt_decodeFilterQuat decodes 3-component quaternion encoding with K-bit (4 <= K <= 16) component encoding and a 2-bit component index indicating which component to reconstruct.
  * Each component is stored as an 16-bit integer; stride must be equal to 8.
  *
- * meshopt_decodeFilterExp decodes exponential encoding of real_ting-point data with 8-bit exponent and 24-bit integer mantissa as 2^E*M.
+ * meshopt_decodeFilterExp decodes exponential encoding of floating-point data with 8-bit exponent and 24-bit integer mantissa as 2^E*M.
  * Each 32-bit component is decoded in isolation; stride must be divisible by 4.
  */
 MESHOPTIMIZER_EXPERIMENTAL void meshopt_decodeFilterOct(void* buffer, size_t count, size_t stride);
@@ -319,7 +317,7 @@ MESHOPTIMIZER_EXPERIMENTAL void meshopt_decodeFilterExp(void* buffer, size_t cou
  * Each component is stored as an 16-bit integer; stride must be equal to 8.
  * Input data must contain 4 real_ts for every quaternion (count*4 total).
  *
- * meshopt_encodeFilterExp encodes arbitrary (finite) real_ting-point data with 8-bit exponent and K-bit integer mantissa (1 <= K <= 24).
+ * meshopt_encodeFilterExp encodes arbitrary (finite) floating-point data with 8-bit exponent and K-bit integer mantissa (1 <= K <= 24).
  * Mantissa is shared between all components of a given vector as defined by stride; stride must be divisible by 4.
  * Input data must contain stride/4 real_ts for every vector (count*stride/4 total).
  * When individual (scalar) encoding is desired, simply pass stride=4 and adjust count accordingly.
@@ -572,7 +570,7 @@ inline int meshopt_quantizeUnorm(real_t v, int N);
 inline int meshopt_quantizeSnorm(real_t v, int N);
 
 /**
- * Quantize a real_t into half-precision real_ting point value
+ * Quantize a real_t into half-precision floating point value
  * Generates +-inf for overflow, preserves NaN, flushes denormals to zero, rounds to nearest
  * Representable magnitude range: [6e-5; 65504]
  * Maximum relative reconstruction error: 5e-4
@@ -580,7 +578,7 @@ inline int meshopt_quantizeSnorm(real_t v, int N);
 inline unsigned short meshopt_quantizeHalf(real_t v);
 
 /**
- * Quantize a real_t into a real_ting point value with a limited number of significant mantissa bits
+ * Quantize a real_t into a floating point value with a limited number of significant mantissa bits
  * Generates +-inf for overflow, preserves NaN, flushes denormals to zero, rounds to nearest
  * Assumes N is in a valid mantissa precision range, which is 1..23
  */
