@@ -113,7 +113,7 @@ static datatype_t getNextVertexDeadEnd(const datatype_t* dead_end, datatype_t& d
 static datatype_t getNextVertexNeighbour(const datatype_t* next_candidates_begin, const datatype_t* next_candidates_end, const datatype_t* live_triangles, const datatype_t* cache_timestamps, datatype_t timestamp, datatype_t cache_size)
 {
 	datatype_t best_candidate = ALL_BITS_ONE;
-	int best_priority = -1;
+	int64_t best_priority = -1;
 
 	for (const datatype_t* next_candidate = next_candidates_begin; next_candidate != next_candidates_end; ++next_candidate)
 	{
@@ -122,7 +122,7 @@ static datatype_t getNextVertexNeighbour(const datatype_t* next_candidates_begin
 		// otherwise we don't need to process it
 		if (live_triangles[vertex] > 0)
 		{
-			int priority = 0;
+			int64_t priority = 0;
 
 			// will it be in cache after fanning?
 			if (2 * live_triangles[vertex] + timestamp - cache_timestamps[vertex] <= cache_size)

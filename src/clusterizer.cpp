@@ -3,7 +3,7 @@
 
 #include <assert.h>
 #include <limits>
-#include <math.h>
+#include <cmath>
 #include <string.h>
 
 // This work is based on:
