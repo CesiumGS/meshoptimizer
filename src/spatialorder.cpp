@@ -70,9 +70,9 @@ static void computeOrder(datatype_t* result, const real_t* vertex_positions_data
 	{
 		const real_t* v = vertex_positions_data + i * vertex_stride_real;
 
-		int x = int((v[0] - minv[0]) * scale * 1023.0 + 0.5);
-		int y = int((v[1] - minv[1]) * scale * 1023.0 + 0.5);
-		int z = int((v[2] - minv[2]) * scale * 1023.0 + 0.5);
+		uint32_t x = uint32_t((v[0] - minv[0]) * scale * 1023.0 + 0.5);
+		uint32_t y = uint32_t((v[1] - minv[1]) * scale * 1023.0 + 0.5);
+		uint32_t z = uint32_t((v[2] - minv[2]) * scale * 1023.0 + 0.5);
 
 		result[i] = part1By2(x) | (part1By2(y) << 1) | (part1By2(z) << 2);
 	}
