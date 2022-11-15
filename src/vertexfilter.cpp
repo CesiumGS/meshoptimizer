@@ -89,10 +89,10 @@ static void decodeFilterOct(T* data, size_t count)
 		real_t l = std::sqrt(x * x + y * y + z * z);
 		real_t s = max / l;
 
-		// rounded signed real_t->int
-		int xf = int(x * s + (x >= 0.f ? 0.5f : -0.5f));
-		int yf = int(y * s + (y >= 0.f ? 0.5f : -0.5f));
-		int zf = int(z * s + (z >= 0.f ? 0.5f : -0.5f));
+		// rounded signed real_t->datatype_t
+		datatype_t xf = datatype_t(x * s + (x >= 0.f ? 0.5f : -0.5f));
+		datatype_t yf = datatype_t(y * s + (y >= 0.f ? 0.5f : -0.5f));
+		datatype_t zf = datatype_t(z * s + (z >= 0.f ? 0.5f : -0.5f));
 
 		data[i * 4 + 0] = T(xf);
 		data[i * 4 + 1] = T(yf);
@@ -102,12 +102,12 @@ static void decodeFilterOct(T* data, size_t count)
 
 static void decodeFilterQuat(short* data, size_t count)
 {
-	const real_t scale = 1.f / std::sqrt(2.f);
+	const real_t scale = 1.0 / std::sqrt(2.0);
 
 	for (size_t i = 0; i < count; ++i)
 	{
 		// recover scale from the high byte of the component
-		int sf = data[i * 4 + 3] | 3;
+		datatype_t sf = data[i * 4 + 3] | 3;
 		real_t ss = scale / real_t(sf);
 
 		// convert x/y/z to [-1..1] (scaled...)
@@ -119,13 +119,13 @@ static void decodeFilterQuat(short* data, size_t count)
 		real_t ww = 1.f - x * x - y * y - z * z;
 		real_t w = std::sqrt(ww >= 0.f ? ww : 0.f);
 
-		// rounded signed real_t->int
-		int xf = int(x * 32767.f + (x >= 0.f ? 0.5f : -0.5f));
-		int yf = int(y * 32767.f + (y >= 0.f ? 0.5f : -0.5f));
-		int zf = int(z * 32767.f + (z >= 0.f ? 0.5f : -0.5f));
-		int wf = int(w * 32767.f + 0.5f);
+		// rounded signed real_t->datatype_t
+		datatype_t xf = datatype_t(x * 32767.f + (x >= 0.f ? 0.5f : -0.5f));
+		datatype_t yf = datatype_t(y * 32767.f + (y >= 0.f ? 0.5f : -0.5f));
+		datatype_t zf = datatype_t(z * 32767.f + (z >= 0.f ? 0.5f : -0.5f));
+		datatype_t wf = datatype_t(w * 32767.f + 0.5f);
 
-		int qc = data[i * 4 + 3] & 3;
+		datatype_t qc = data[i * 4 + 3] & 3;
 
 		// output order is dictated by input index
 		data[i * 4 + ((qc + 1) & 3)] = short(xf);

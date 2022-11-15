@@ -111,9 +111,9 @@ void setupShaders(ID3D11Device* device, ID3D11DeviceContext* context)
 	// load and compile the two shaders
 	const char* shaders =
 	    "#define ATTRIBUTES 5\n"
-	    "struct Foo { real_t4 v[ATTRIBUTES]; };"
-	    "real_t4 VS(uint index: SV_VertexId, out Foo foo: FOO): SV_Position { uint i = index % 3; [unroll] for (int j = 0; j < ATTRIBUTES; j++) foo.v[j] = j; return real_t4(i != 0, i != 2, 0, 1); }"
-	    "real_t4 PS(Foo foo: FOO): SV_Target { real_t4 result = 0; [unroll] for (int j = 0; j < ATTRIBUTES; j++) result += foo.v[j]; return result; }";
+	    "struct Foo { float4 v[ATTRIBUTES]; };"
+	    "float4 VS(uint index: SV_VertexId, out Foo foo: FOO): SV_Position { uint i = index % 3; [unroll] for (int j = 0; j < ATTRIBUTES; j++) foo.v[j] = j; return float4(i != 0, i != 2, 0, 1); }"
+	    "float4 PS(Foo foo: FOO): SV_Target { float4 result = 0; [unroll] for (int j = 0; j < ATTRIBUTES; j++) result += foo.v[j]; return result; }";
 
 	ID3DBlob* vsblob = 0;
 	ID3DBlob* psblob = 0;
