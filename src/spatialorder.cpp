@@ -28,13 +28,13 @@ inline uint32_t part1By2<uint32_t>(uint32_t x)
 template <>
 inline uint64_t part1By2<uint64_t>(uint64_t x)
 {
-    x = x & 0x5555555555555555;
-    x = (x | (x >> 1))  & 0x3333333333333333;
-    x = (x | (x >> 2))  & 0x0F0F0F0F0F0F0F0F;
-    x = (x | (x >> 4))  & 0x00FF00FF00FF00FF;
-    x = (x | (x >> 8))  & 0x0000FFFF0000FFFF;
-    x = (x | (x >> 16)) & 0x00000000FFFFFFFF;
-    return x;
+	x = x & 0x1fffff; // we only look at the first 21 bits
+	x = (x | x << 32) & 0x1f00000000ffff; // shift left 32 bits, OR with self, and 00011111000000000000000000000000000000001111111111111111
+	x = (x | x << 16) & 0x1f0000ff0000ff; // shift left 32 bits, OR with self, and 00011111000000000000000011111111000000000000000011111111
+	x = (x | x << 8) & 0x100f00f00f00f00f; // shift left 32 bits, OR with self, and 0001000000001111000000001111000000001111000000001111000000000000
+	x = (x | x << 4) & 0x10c30c30c30c30c3; // shift left 32 bits, OR with self, and 0001000011000011000011000011000011000011000011000011000100000000
+	x = (x | x << 2) & 0x1249249249249249;
+	return x;
 }
 
 static void computeOrder(datatype_t* result, const real_t* vertex_positions_data, size_t vertex_count, size_t vertex_positions_stride)
