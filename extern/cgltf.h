@@ -3594,8 +3594,8 @@ static int cgltf_parse_json_texture_view(cgltf_options* options, jsmntok_t const
 {
 	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
 
-	out_texture_view->scale = 1.0f;
-	cgltf_fill_real_array(out_texture_view->transform.scale, 2, 1.0f);
+	out_texture_view->scale = 1.0;
+	cgltf_fill_real_array(out_texture_view->transform.scale, 2, 1.0);
 
 	int size = tokens[i].size;
 	++i;
@@ -3874,8 +3874,8 @@ static int cgltf_parse_json_specular(cgltf_options* options, jsmntok_t const* to
 	++i;
 
 	// Default values
-	out_specular->specular_factor = 1.0f;
-	cgltf_fill_real_array(out_specular->specular_color_factor, 3, 1.0f);
+	out_specular->specular_factor = 1.0;
+	cgltf_fill_real_array(out_specular->specular_color_factor, 3, 1.0);
 
 	for (int j = 0; j < size; ++j)
 	{
@@ -4359,16 +4359,16 @@ static int cgltf_parse_json_material(cgltf_options* options, jsmntok_t const* to
 {
 	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
 
-	cgltf_fill_real_array(out_material->pbr_metallic_roughness.base_color_factor, 4, 1.0f);
-	out_material->pbr_metallic_roughness.metallic_factor = 1.0f;
-	out_material->pbr_metallic_roughness.roughness_factor = 1.0f;
+	cgltf_fill_real_array(out_material->pbr_metallic_roughness.base_color_factor, 4, 1.0);
+	out_material->pbr_metallic_roughness.metallic_factor = 1.0;
+	out_material->pbr_metallic_roughness.roughness_factor = 1.0;
 
-	cgltf_fill_real_array(out_material->pbr_specular_glossiness.diffuse_factor, 4, 1.0f);
-	cgltf_fill_real_array(out_material->pbr_specular_glossiness.specular_factor, 3, 1.0f);
-	out_material->pbr_specular_glossiness.glossiness_factor = 1.0f;
+	cgltf_fill_real_array(out_material->pbr_specular_glossiness.diffuse_factor, 4, 1.0);
+	cgltf_fill_real_array(out_material->pbr_specular_glossiness.specular_factor, 3, 1.0);
+	out_material->pbr_specular_glossiness.glossiness_factor = 1.0;
 
-	cgltf_fill_real_array(out_material->volume.attenuation_color, 3, 1.0f);
-	out_material->volume.attenuation_distance = FLT_MAX;
+	cgltf_fill_real_array(out_material->volume.attenuation_color, 3, 1.0);
+	out_material->volume.attenuation_distance = std::numeric_limits<real_t>::max();
 
 	out_material->alpha_cutoff = 0.5;
 
@@ -5327,14 +5327,14 @@ static int cgltf_parse_json_node(cgltf_options* options, jsmntok_t const* tokens
 {
 	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
 
-	out_node->rotation[3] = 1.0f;
-	out_node->scale[0] = 1.0f;
-	out_node->scale[1] = 1.0f;
-	out_node->scale[2] = 1.0f;
-	out_node->matrix[0] = 1.0f;
-	out_node->matrix[5] = 1.0f;
-	out_node->matrix[10] = 1.0f;
-	out_node->matrix[15] = 1.0f;
+	out_node->rotation[3] = 1.0;
+	out_node->scale[0] = 1.0;
+	out_node->scale[1] = 1.0;
+	out_node->scale[2] = 1.0;
+	out_node->matrix[0] = 1.0;
+	out_node->matrix[5] = 1.0;
+	out_node->matrix[10] = 1.0;
+	out_node->matrix[15] = 1.0;
 
 	int size = tokens[i].size;
 	++i;

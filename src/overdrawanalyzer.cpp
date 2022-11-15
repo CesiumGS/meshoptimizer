@@ -156,8 +156,8 @@ meshopt_OverdrawStatistics meshopt_analyzeOverdraw(const datatype_t* indices, si
 
 	meshopt_OverdrawStatistics result = {};
 
-	real_t minv[3] = {FLT_MAX, FLT_MAX, FLT_MAX};
-	real_t maxv[3] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+	real_t minv[3] = {REAL_MAX, REAL_MAX, REAL_MAX};
+	real_t maxv[3] = {-REAL_MAX, -REAL_MAX, -REAL_MAX};
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{

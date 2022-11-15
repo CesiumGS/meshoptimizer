@@ -487,7 +487,7 @@ static void writeMaterialComponent(std::string& json, const cgltf_data* data, co
 		append(json, tm.attenuation_color[2]);
 		append(json, "]");
 	}
-	if (tm.attenuation_distance != FLT_MAX)
+	if (tm.attenuation_distance != REAL_MAX)
 	{
 		comma(json);
 		append(json, "\"attenuationDistance\":");

@@ -521,7 +521,7 @@ void simplifyComplete(const Mesh& mesh)
 	{
 		std::vector<datatype_t>& lod = lods[i];
 
-		real_t threshold = powf(0.7f, real_t(i));
+		real_t threshold = powf(0.7, real_t(i));
 		size_t target_index_count = size_t(mesh.indices.size() * threshold) / 3 * 3;
 		real_t target_error = 1e-2f;
 
@@ -544,7 +544,7 @@ void simplifyComplete(const Mesh& mesh)
 		std::vector<datatype_t>& lod = lods[i];
 
 		meshopt_optimizeVertexCache(&lod[0], &lod[0], lod.size(), mesh.vertices.size());
-		meshopt_optimizeOverdraw(&lod[0], &lod[0], lod.size(), &mesh.vertices[0].px, mesh.vertices.size(), sizeof(Vertex), 1.0f);
+		meshopt_optimizeOverdraw(&lod[0], &lod[0], lod.size(), &mesh.vertices[0].px, mesh.vertices.size(), sizeof(Vertex), 1.0);
 	}
 
 	// concatenate all LODs into one IB

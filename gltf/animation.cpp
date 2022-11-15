@@ -34,16 +34,16 @@ static real_t getDeltaTolerance(cgltf_animation_path_type type)
 	switch (type)
 	{
 	case cgltf_animation_path_type_translation:
-		return 0.0001f; // 0.1mm linear
+		return 0.0001; // 0.1mm linear
 
 	case cgltf_animation_path_type_rotation:
-		return 0.1f * (3.1415926f / 180.f); // 0.1 degrees
+		return 0.1 * (3.1415926 / 180.0); // 0.1 degrees
 
 	case cgltf_animation_path_type_scale:
-		return 0.001f; // 0.1% ratio
+		return 0.001; // 0.1% ratio
 
 	case cgltf_animation_path_type_weights:
-		return 0.001f; // 0.1% linear
+		return 0.001; // 0.1% linear
 
 	default:
 		assert(!"Uknown animation path");
@@ -60,8 +60,8 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_anim
 		real_t ca = l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3];
 
 		real_t d = std::abs(ca);
-		real_t A = 1.0904f + d * (-3.2452f + d * (3.55645f - d * 1.43519f));
-		real_t B = 0.848013f + d * (-1.06021f + d * 0.215638f);
+		real_t A = 1.0904 + d * (-3.2452 + d * (3.55645 - d * 1.43519));
+		real_t B = 0.848013 + d * (-1.06021 + d * 0.215638);
 		real_t k = A * (t - 0.5) * (t - 0.5) + B;
 		real_t ot = t + t * (t - 0.5) * (t - 1) * k;
 
@@ -276,7 +276,7 @@ static real_t getWorldScale(cgltf_node* node)
 
 void processAnimation(Animation& animation, const Settings& settings)
 {
-	real_t mint = FLT_MAX, maxt = 0;
+	real_t mint = REAL_MAX, maxt = 0;
 
 	for (size_t i = 0; i < animation.tracks.size(); ++i)
 	{

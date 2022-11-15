@@ -1084,7 +1084,7 @@ int read_mtllib(fastObjData* data, void* file, const fastObjCallbacks* callbacks
                 if (!found_d)
                 {
                     /* Ignore Tr if we've already read d */
-                    mtl.d = 1.0f - Tr;
+                    mtl.d = 1.0 - Tr;
                 }
             }
             else if (p[1] == 'f')
@@ -1419,7 +1419,7 @@ fastObjMesh* fast_obj_read_with_callbacks(const char* path, const fastObjCallbac
 
     array_push(m->normals, 0.0f);
     array_push(m->normals, 0.0f);
-    array_push(m->normals, 1.0f);
+    array_push(m->normals, 1.0);
 
 
     /* Data needed during parsing */

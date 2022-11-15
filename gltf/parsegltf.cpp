@@ -212,7 +212,7 @@ static void parseMeshesGltf(cgltf_data* data, std::vector<Mesh>& meshes, std::ve
 				if (attr.type == cgltf_attribute_type_color && attr.data->type == cgltf_type_vec3)
 				{
 					for (size_t i = 0; i < s.data.size(); ++i)
-						s.data[i].f[3] = 1.0f;
+						s.data[i].f[3] = 1.0;
 				}
 			}
 

@@ -62,19 +62,19 @@ static cgltf_data* parseSceneObj(fastObjMesh* obj)
 		fastObjMaterial& om = obj->materials[mi];
 
 		gm.has_pbr_metallic_roughness = true;
-		gm.pbr_metallic_roughness.base_color_factor[0] = 1.0f;
-		gm.pbr_metallic_roughness.base_color_factor[1] = 1.0f;
-		gm.pbr_metallic_roughness.base_color_factor[2] = 1.0f;
-		gm.pbr_metallic_roughness.base_color_factor[3] = 1.0f;
+		gm.pbr_metallic_roughness.base_color_factor[0] = 1.0;
+		gm.pbr_metallic_roughness.base_color_factor[1] = 1.0;
+		gm.pbr_metallic_roughness.base_color_factor[2] = 1.0;
+		gm.pbr_metallic_roughness.base_color_factor[3] = 1.0;
 		gm.pbr_metallic_roughness.metallic_factor = 0.0f;
-		gm.pbr_metallic_roughness.roughness_factor = 1.0f;
+		gm.pbr_metallic_roughness.roughness_factor = 1.0;
 
 		gm.alpha_cutoff = 0.5;
 
 		if (om.map_Kd.name)
 		{
 			gm.pbr_metallic_roughness.base_color_texture.texture = &data->textures[textureIndex(textures, om.map_Kd.name)];
-			gm.pbr_metallic_roughness.base_color_texture.scale = 1.0f;
+			gm.pbr_metallic_roughness.base_color_texture.scale = 1.0;
 
 			gm.alpha_mode = (om.illum == 4 || om.illum == 6 || om.illum == 7 || om.illum == 9) ? cgltf_alpha_mode_mask : cgltf_alpha_mode_opaque;
 		}

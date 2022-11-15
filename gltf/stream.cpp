@@ -16,8 +16,8 @@ struct Bounds
 
 	Bounds()
 	{
-		min.f[0] = min.f[1] = min.f[2] = min.f[3] = +FLT_MAX;
-		max.f[0] = max.f[1] = max.f[2] = max.f[3] = -FLT_MAX;
+		min.f[0] = min.f[1] = min.f[2] = min.f[3] = + REAL_MAX;
+		max.f[0] = max.f[1] = max.f[2] = max.f[3] = - REAL_MAX;
 	}
 
 	bool isValid() const
@@ -180,8 +180,8 @@ void getPositionBounds(real_t min[3], real_t max[3], const Stream& stream, const
 	assert(stream.type == cgltf_attribute_type_position);
 	assert(stream.data.size() > 0);
 
-	min[0] = min[1] = min[2] = FLT_MAX;
-	max[0] = max[1] = max[2] = -FLT_MAX;
+	min[0] = min[1] = min[2] = REAL_MAX;
+	max[0] = max[1] = max[2] = -REAL_MAX;
 
 	for (size_t i = 0; i < stream.data.size(); ++i)
 	{

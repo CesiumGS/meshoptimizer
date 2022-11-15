@@ -955,7 +955,7 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 		h *= 0x5bd1e995;
 		h ^= h >> 15;
 
-		Attr c = {{real_t(h & 0xff) / 255.0, real_t((h >> 8) & 0xff) / 255.0, real_t((h >> 16) & 0xff) / 255.0, 0.1f}};
+		Attr c = {{real_t(h & 0xff) / 255.0, real_t((h >> 8) & 0xff) / 255.0, real_t((h >> 16) & 0xff) / 255.0, 0.1}};
 
 		datatype_t offset = datatype_t(bv.data.size());
 
@@ -963,12 +963,12 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 
 		for (int y = 0; y <= N; ++y)
 		{
-			real_t u = (y == N) ? 0 : real_t(y) / N * 2 * 3.1415926f;
+			real_t u = (y == N) ? 0 : real_t(y) / N * 2.0 * 3.1415926;
 			real_t sinu = sinf(u), cosu = cosf(u);
 
 			for (int x = 0; x <= N; ++x)
 			{
-				real_t v = real_t(x) / N * 3.1415926f;
+				real_t v = real_t(x) / N * 3.1415926;
 				real_t sinv = sinf(v), cosv = cosf(v);
 
 				real_t fx = sinv * cosu;

@@ -377,7 +377,7 @@ bool hasValidTransform(const cgltf_texture_view& view)
 	if (view.has_transform)
 	{
 		if (view.transform.offset[0] != 0.0f || view.transform.offset[1] != 0.0f ||
-		    view.transform.scale[0] != 1.0f || view.transform.scale[1] != 1.0f ||
+		    view.transform.scale[0] != 1.0 || view.transform.scale[1] != 1.0 ||
 		    view.transform.rotation != 0.0f)
 			return true;
 

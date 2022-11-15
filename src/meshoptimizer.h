@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <cstdint>
+#include <limits>
 
 /* Version macro; major * 1000 + minor * 10 + patch */
 #define MESHOPTIMIZER_VERSION 180 /* 0.18 */
@@ -49,6 +50,7 @@ constexpr size_t NUM_BITS = 32;
 #endif
 
 constexpr datatype_t ALL_BITS_ONE = ~datatype_t(0);
+constexpr real_t REAL_MAX = std::numeric_limits<real_t>::max();
 
 /**
  * Vertex attribute stream
@@ -292,7 +294,7 @@ MESHOPTIMIZER_API int meshopt_decodeVertexBuffer(void* destination, size_t verte
  * Vertex buffer filters
  * These functions can be used to filter output of meshopt_decodeVertexBuffer in-place.
  *
- * meshopt_decodeFilterOct decodes octahedral encoding of a unit vector with K-bit (K <= 16) signed X/Y as an input; Z must store 1.0f.
+ * meshopt_decodeFilterOct decodes octahedral encoding of a unit vector with K-bit (K <= 16) signed X/Y as an input; Z must store 1.0.
  * Each component is stored as an 8-bit or 16-bit normalized integer; stride must be equal to 4 or 8. W is preserved as is.
  *
  * meshopt_decodeFilterQuat decodes 3-component quaternion encoding with K-bit (4 <= K <= 16) component encoding and a 2-bit component index indicating which component to reconstruct.

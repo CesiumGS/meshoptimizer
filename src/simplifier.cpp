@@ -382,8 +382,8 @@ static real_t rescalePositions(Vector3* result, const real_t* vertex_positions_d
 {
 	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
-	real_t minv[3] = {FLT_MAX, FLT_MAX, FLT_MAX};
-	real_t maxv[3] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+	real_t minv[3] = {REAL_MAX, REAL_MAX, REAL_MAX};
+	real_t maxv[3] = {-REAL_MAX, -REAL_MAX, -REAL_MAX};
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
@@ -774,7 +774,7 @@ static void dumpEdgeCollapses(const Collapse* collapses, size_t collapse_count, 
 
 	for (int k0 = 0; k0 < Kind_Count; ++k0)
 		for (int k1 = 0; k1 < Kind_Count; ++k1)
-			cerrors[k0][k1] = FLT_MAX;
+			cerrors[k0][k1] = REAL_MAX;
 
 	for (size_t i = 0; i < collapse_count; ++i)
 	{
@@ -886,7 +886,7 @@ static size_t performEdgeCollapses(datatype_t* collapse_remap, unsigned char* co
 
 		// we limit the error in each pass based on the error of optimal last collapse; since many collapses will be locked
 		// as they will share vertices with other successfull collapses, we need to increase the acceptable error by some factor
-		real_t error_goal = edge_collapse_goal < collapse_count ? 1.5 * collapses[collapse_order[edge_collapse_goal]].error : FLT_MAX;
+		real_t error_goal = edge_collapse_goal < collapse_count ? 1.5 * collapses[collapse_order[edge_collapse_goal]].error : REAL_MAX;
 
 		// on average, each collapse is expected to lock 6 other collapses; to avoid degenerate passes on meshes with odd
 		// topology, we only abort if we got over 1/6 collapses accordingly.

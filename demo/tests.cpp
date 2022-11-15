@@ -733,7 +733,7 @@ void encodeFilterExp()
 	const real_t data[3] = {
 	    1,
 	    -23.4f,
-	    -0.1f,
+	    -0.1,
 	};
 
 	const datatype_t expected[3] = {

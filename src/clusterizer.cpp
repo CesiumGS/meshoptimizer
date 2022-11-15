@@ -780,7 +780,7 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 	// degenerate cluster, normal cone is larger than a hemisphere => trivial accept
 	// note that if mindp is positive but close to 0, the triangle intersection code below gets less stable
 	// we arbitrarily decide that if a normal cone is ~168 degrees wide or more, the cone isn't useful
-	if (mindp <= 0.1f)
+	if (mindp <= 0.1)
 	{
 		bounds.cone_cutoff = 1;
 		bounds.cone_cutoff_s8 = 127;

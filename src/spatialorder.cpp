@@ -41,8 +41,8 @@ static void computeOrder(datatype_t* result, const real_t* vertex_positions_data
 {
 	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
-	real_t minv[3] = {FLT_MAX, FLT_MAX, FLT_MAX};
-	real_t maxv[3] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+	real_t minv[3] = {REAL_MAX, REAL_MAX, REAL_MAX};
+	real_t maxv[3] = {-REAL_MAX, -REAL_MAX, -REAL_MAX};
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
