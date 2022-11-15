@@ -66,13 +66,13 @@ static void rasterize(OverdrawBuffer* buffer, real_t v1x, real_t v1y, real_t v1z
 	}
 
 	// coordinates, 28.4 fixed point
-	int X1 = int(16.0f * v1x + 0.5f);
-	int X2 = int(16.0f * v2x + 0.5f);
-	int X3 = int(16.0f * v3x + 0.5f);
+	int X1 = int(16.0f * v1x + 0.5);
+	int X2 = int(16.0f * v2x + 0.5);
+	int X3 = int(16.0f * v3x + 0.5);
 
-	int Y1 = int(16.0f * v1y + 0.5f);
-	int Y2 = int(16.0f * v2y + 0.5f);
-	int Y3 = int(16.0f * v3y + 0.5f);
+	int Y1 = int(16.0f * v1y + 0.5);
+	int Y2 = int(16.0f * v2y + 0.5);
+	int Y3 = int(16.0f * v3y + 0.5);
 
 	// bounding rectangle, clipped against viewport
 	// since we rasterize pixels with covered centers, min >0.5 should round up
@@ -104,7 +104,7 @@ static void rasterize(OverdrawBuffer* buffer, real_t v1x, real_t v1y, real_t v1z
 	int CY1 = DX12 * (FY - Y1) - DY12 * (FX - X1) + TL1 - 1;
 	int CY2 = DX23 * (FY - Y2) - DY23 * (FX - X2) + TL2 - 1;
 	int CY3 = DX31 * (FY - Y3) - DY31 * (FX - X3) + TL3 - 1;
-	real_t ZY = v1z + (DZx * real_t(FX - X1) + DZy * real_t(FY - Y1)) * (1 / 16.f);
+	real_t ZY = v1z + (DZx * real_t(FX - X1) + DZy * real_t(FY - Y1)) * (1 / 16.0);
 
 	for (int y = miny; y < maxy; y++)
 	{
@@ -152,7 +152,7 @@ meshopt_OverdrawStatistics meshopt_analyzeOverdraw(const datatype_t* indices, si
 
 	meshopt_Allocator allocator;
 
-	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
+	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
 	meshopt_OverdrawStatistics result = {};
 
@@ -161,7 +161,7 @@ meshopt_OverdrawStatistics meshopt_analyzeOverdraw(const datatype_t* indices, si
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		const real_t* v = vertex_positions + i * vertex_stride_real_t;
+		const real_t* v = vertex_positions + i * vertex_stride_real;
 
 		for (int j = 0; j < 3; ++j)
 		{
@@ -180,7 +180,7 @@ meshopt_OverdrawStatistics meshopt_analyzeOverdraw(const datatype_t* indices, si
 		datatype_t index = indices[i];
 		assert(index < vertex_count);
 
-		const real_t* v = vertex_positions + index * vertex_stride_real_t;
+		const real_t* v = vertex_positions + index * vertex_stride_real;
 
 		triangles[i * 3 + 0] = (v[0] - minv[0]) * scale;
 		triangles[i * 3 + 1] = (v[1] - minv[1]) * scale;
@@ -224,7 +224,7 @@ meshopt_OverdrawStatistics meshopt_analyzeOverdraw(const datatype_t* indices, si
 				}
 	}
 
-	result.overdraw = result.pixels_covered ? real_t(result.pixels_shaded) / real_t(result.pixels_covered) : 0.f;
+	result.overdraw = result.pixels_covered ? real_t(result.pixels_shaded) / real_t(result.pixels_covered) : 0.0;
 
 	return result;
 }

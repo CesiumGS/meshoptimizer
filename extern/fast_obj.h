@@ -561,7 +561,7 @@ const char* parse_int(const char* ptr, int* val)
 
 
 static
-const char* parse_real_t(const char* ptr, real_t* val)
+const char* parse_real(const char* ptr, real_t* val)
 {
     double        sign;
     double        num;
@@ -652,7 +652,7 @@ const char* parse_vertex(fastObjData* data, const char* ptr)
 
     for (ii = 0; ii < 3; ii++)
     {
-        ptr = parse_real_t(ptr, &v);
+        ptr = parse_real(ptr, &v);
         array_push(data->mesh->positions, v);
     }
 
@@ -669,7 +669,7 @@ const char* parse_texcoord(fastObjData* data, const char* ptr)
 
     for (ii = 0; ii < 2; ii++)
     {
-        ptr = parse_real_t(ptr, &v);
+        ptr = parse_real(ptr, &v);
         array_push(data->mesh->texcoords, v);
     }
 
@@ -686,7 +686,7 @@ const char* parse_normal(fastObjData* data, const char* ptr)
 
     for (ii = 0; ii < 3; ii++)
     {
-        ptr = parse_real_t(ptr, &v);
+        ptr = parse_real(ptr, &v);
         array_push(data->mesh->normals, v);
     }
 
@@ -941,7 +941,7 @@ const char* read_mtl_int(const char* p, int* v)
 static
 const char* read_mtl_single(const char* p, real_t* v)
 {
-    return parse_real_t(p, v);
+    return parse_real(p, v);
 }
 
 

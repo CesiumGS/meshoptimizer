@@ -18,7 +18,7 @@ static real_t inverseTranspose(real_t* result, const real_t* transform)
 	    m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
 	    m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 
-	real_t invdet = (det == 0.f) ? 0.f : 1.f / det;
+	real_t invdet = (det == 0.0) ? 0.0 : 1.0 / det;
 
 	real_t r[4][4] = {};
 
@@ -32,7 +32,7 @@ static real_t inverseTranspose(real_t* result, const real_t* transform)
 	r[1][2] = (m[2][0] * m[0][1] - m[0][0] * m[2][1]) * invdet;
 	r[2][2] = (m[0][0] * m[1][1] - m[1][0] * m[0][1]) * invdet;
 
-	r[3][3] = 1.f;
+	r[3][3] = 1.0;
 
 	memcpy(result, r, 16 * sizeof(real_t));
 
@@ -57,7 +57,7 @@ static void transformNormal(real_t* res, const real_t* ptr, const real_t* transf
 	real_t z = ptr[0] * transform[2] + ptr[1] * transform[6] + ptr[2] * transform[10];
 
 	real_t l = std::sqrt(x * x + y * y + z * z);
-	real_t s = (l == 0.f) ? 0.f : 1 / l;
+	real_t s = (l == 0.0) ? 0.0 : 1 / l;
 
 	res[0] = x * s;
 	res[1] = y * s;
@@ -630,7 +630,7 @@ static void filterBones(Mesh& mesh)
 		return;
 
 	// weights below cutoff can't be represented in quantized 8-bit storage
-	const real_t weight_cutoff = 0.5f / 255.f;
+	const real_t weight_cutoff = 0.5 / 255.0;
 
 	size_t vertex_count = mesh.streams[0].data.size();
 
@@ -671,8 +671,8 @@ static void filterBones(Mesh& mesh)
 			}
 			else
 			{
-				ja.f[k] = 0.f;
-				wa.f[k] = 0.f;
+				ja.f[k] = 0.0;
+				wa.f[k] = 0.0;
 			}
 		}
 	}
@@ -813,11 +813,11 @@ void debugSimplify(const Mesh& source, Mesh& kinds, Mesh& loops, real_t ratio)
 
 	// color palette for display
 	static const Attr kPalette[] = {
-	    {0.5f, 0.5f, 0.5f, 1.f}, // manifold
-	    {0.f, 0.f, 1.f, 1.f},    // border
-	    {0.f, 1.f, 0.f, 1.f},    // seam
-	    {0.f, 1.f, 1.f, 1.f},    // complex
-	    {1.f, 0.f, 0.f, 1.f},    // locked
+	    {0.5, 0.5, 0.5, 1.0}, // manifold
+	    {0.0, 0.0, 1.0, 1.0},    // border
+	    {0.0, 1.0, 0.0, 1.0},    // seam
+	    {0.0, 1.0, 1.0, 1.0},    // complex
+	    {1.0, 0.0, 0.0, 1.0},    // locked
 	};
 
 	// prepare meshes
@@ -887,7 +887,7 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 	const Stream* positions = getStream(mesh, cgltf_attribute_type_position);
 	assert(positions);
 
-	const real_t cone_weight = 0.f;
+	const real_t cone_weight = 0.0;
 
 	size_t max_triangles = (max_vertices * 2 + 3) & ~3;
 	size_t max_meshlets = meshopt_buildMeshletsBound(mesh.indices.size(), max_vertices, max_triangles);
@@ -916,7 +916,7 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 		h *= 0x5bd1e995;
 		h ^= h >> 15;
 
-		Attr c = {{real_t(h & 0xff) / 255.f, real_t((h >> 8) & 0xff) / 255.f, real_t((h >> 16) & 0xff) / 255.f, 1.f}};
+		Attr c = {{real_t(h & 0xff) / 255.0, real_t((h >> 8) & 0xff) / 255.0, real_t((h >> 16) & 0xff) / 255.0, 1.0}};
 
 		datatype_t offset = datatype_t(mv.data.size());
 
@@ -955,7 +955,7 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 		h *= 0x5bd1e995;
 		h ^= h >> 15;
 
-		Attr c = {{real_t(h & 0xff) / 255.f, real_t((h >> 8) & 0xff) / 255.f, real_t((h >> 16) & 0xff) / 255.f, 0.1f}};
+		Attr c = {{real_t(h & 0xff) / 255.0, real_t((h >> 8) & 0xff) / 255.0, real_t((h >> 16) & 0xff) / 255.0, 0.1f}};
 
 		datatype_t offset = datatype_t(bv.data.size());
 
@@ -975,7 +975,7 @@ void debugMeshlets(const Mesh& source, Mesh& meshlets, Mesh& bounds, int max_ver
 				real_t fy = sinv * sinu;
 				real_t fz = cosv;
 
-				Attr p = {{mb.center[0] + mb.radius * fx, mb.center[1] + mb.radius * fy, mb.center[2] + mb.radius * fz, 1.f}};
+				Attr p = {{mb.center[0] + mb.radius * fx, mb.center[1] + mb.radius * fy, mb.center[2] + mb.radius * fz, 1.0}};
 
 				bv.data.push_back(p);
 				bc.data.push_back(c);

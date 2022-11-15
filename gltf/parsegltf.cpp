@@ -43,7 +43,7 @@ static void readAccessor(std::vector<real_t>& data, const cgltf_accessor* access
 	assert(accessor->type == cgltf_type_scalar);
 
 	data.resize(accessor->count);
-	cgltf_accessor_unpack_real_ts(accessor, &data[0], data.size());
+	cgltf_accessor_unpack_real(accessor, &data[0], data.size());
 }
 
 static void readAccessor(std::vector<Attr>& data, const cgltf_accessor* accessor)
@@ -51,7 +51,7 @@ static void readAccessor(std::vector<Attr>& data, const cgltf_accessor* accessor
 	size_t components = cgltf_num_components(accessor->type);
 
 	std::vector<real_t> temp(accessor->count * components);
-	cgltf_accessor_unpack_real_ts(accessor, &temp[0], temp.size());
+	cgltf_accessor_unpack_real(accessor, &temp[0], temp.size());
 
 	data.resize(accessor->count);
 

@@ -36,12 +36,12 @@ struct Profile
 
 Profile profiles[] =
 {
-	{1.f, 0, 0, 0, 0},  // Compression
-	{1.f, 0, 0, 0, 1},  // Compression w/deflate
-	// {1.f, 14, 64, 128}, // AMD GCN
-	// {1.f, 32, 32, 32},  // NVidia Pascal
-	// {1.f, 16, 32, 32}, // NVidia Kepler, Maxwell
-	// {1.f, 128, 0, 0}, // Intel
+	{1.0, 0, 0, 0, 0},  // Compression
+	{1.0, 0, 0, 0, 1},  // Compression w/deflate
+	// {1.0, 14, 64, 128}, // AMD GCN
+	// {1.0, 32, 32, 32},  // NVidia Pascal
+	// {1.0, 16, 32, 32}, // NVidia Kepler, Maxwell
+	// {1.0, 128, 0, 0}, // Intel
 };
 
 const int Profile_Count = sizeof(profiles) / sizeof(profiles[0]);
@@ -316,7 +316,7 @@ std::pair<State, real_t> genN(std::vector<State>& seed, const std::vector<Mesh>&
 				real_t r = rand01();
 
 				if (r < crossover || j == rc)
-					result[i].cache[j] = std::max(0.f, std::min(1.f, seed[a].cache[j] + weight * (seed[b].cache[j] - seed[c].cache[j])));
+					result[i].cache[j] = std::max(0.0, std::min(1.0, seed[a].cache[j] + weight * (seed[b].cache[j] - seed[c].cache[j])));
 				else
 					result[i].cache[j] = seed[i].cache[j];
 			}
@@ -326,7 +326,7 @@ std::pair<State, real_t> genN(std::vector<State>& seed, const std::vector<Mesh>&
 				real_t r = rand01();
 
 				if (r < crossover || j == rl)
-					result[i].live[j] = std::max(0.f, std::min(1.f, seed[a].live[j] + weight * (seed[b].live[j] - seed[c].live[j])));
+					result[i].live[j] = std::max(0.0, std::min(1.0, seed[a].live[j] + weight * (seed[b].live[j] - seed[c].live[j])));
 				else
 					result[i].live[j] = seed[i].live[j];
 			}

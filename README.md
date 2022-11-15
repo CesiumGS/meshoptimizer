@@ -262,7 +262,7 @@ size_t target_index_count = size_t(index_count * threshold);
 float target_error = 1e-2f;
 
 std::vector<datatype_t> lod(index_count);
-float lod_error = 0.f;
+float lod_error = 0.0;
 lod.resize(meshopt_simplify(&lod[0], indices, index_count, &vertices[0].x, vertex_count, sizeof(Vertex),
     target_index_count, target_error, &lod_error));
 ```
@@ -277,7 +277,7 @@ size_t target_index_count = size_t(index_count * threshold);
 float target_error = 1e-1f;
 
 std::vector<datatype_t> lod(index_count);
-float lod_error = 0.f;
+float lod_error = 0.0;
 lod.resize(meshopt_simplifySloppy(&lod[0], indices, index_count, &vertices[0].x, vertex_count, sizeof(Vertex),
     target_index_count, target_error, &lod_error));
 ```

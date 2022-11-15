@@ -112,11 +112,11 @@ static void updateEdgeAdjacency(EdgeAdjacency& adjacency, const datatype_t* indi
 struct PositionHasher
 {
 	const real_t* vertex_positions;
-	size_t vertex_stride_real_t;
+	size_t vertex_stride_real;
 
 	size_t hash(datatype_t index) const
 	{
-		const datatype_t* key = reinterpret_cast<const datatype_t*>(vertex_positions + index * vertex_stride_real_t);
+		const datatype_t* key = reinterpret_cast<const datatype_t*>(vertex_positions + index * vertex_stride_real);
 
 		// scramble bits to make sure that integer coordinates have entropy in lower bits
 		datatype_t x = key[0] ^ (key[0] >> 17);
@@ -129,7 +129,7 @@ struct PositionHasher
 
 	bool equal(datatype_t lhs, datatype_t rhs) const
 	{
-		return memcmp(vertex_positions + lhs * vertex_stride_real_t, vertex_positions + rhs * vertex_stride_real_t, sizeof(real_t) * 3) == 0;
+		return memcmp(vertex_positions + lhs * vertex_stride_real, vertex_positions + rhs * vertex_stride_real, sizeof(real_t) * 3) == 0;
 	}
 };
 
@@ -380,14 +380,14 @@ struct Vector3
 
 static real_t rescalePositions(Vector3* result, const real_t* vertex_positions_data, size_t vertex_count, size_t vertex_positions_stride)
 {
-	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
+	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
 	real_t minv[3] = {FLT_MAX, FLT_MAX, FLT_MAX};
 	real_t maxv[3] = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
 
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
-		const real_t* v = vertex_positions_data + i * vertex_stride_real_t;
+		const real_t* v = vertex_positions_data + i * vertex_stride_real;
 
 		if (result)
 		{
@@ -405,7 +405,7 @@ static real_t rescalePositions(Vector3* result, const real_t* vertex_positions_d
 		}
 	}
 
-	real_t extent = 0.f;
+	real_t extent = 0.0;
 
 	extent = (maxv[0] - minv[0]) < extent ? extent : (maxv[0] - minv[0]);
 	extent = (maxv[1] - minv[1]) < extent ? extent : (maxv[1] - minv[1]);
@@ -413,7 +413,7 @@ static real_t rescalePositions(Vector3* result, const real_t* vertex_positions_d
 
 	if (result)
 	{
-		real_t scale = extent == 0 ? 0.f : 1.f / extent;
+		real_t scale = extent == 0 ? 0.0 : 1.0 / extent;
 
 		for (size_t i = 0; i < vertex_count; ++i)
 		{
@@ -499,7 +499,7 @@ static real_t quadricError(const Quadric& Q, const Vector3& v)
 	r += ry * v.y;
 	r += rz * v.z;
 
-	real_t s = Q.w == 0.f ? 0.f : 1.f / Q.w;
+	real_t s = Q.w == 0.0 ? 0.0 : 1.0 / Q.w;
 
 	return std::abs(r) * s;
 }
@@ -530,12 +530,12 @@ static void quadricFromPoint(Quadric& Q, real_t x, real_t y, real_t z, real_t w)
 	Q.a00 = w;
 	Q.a11 = w;
 	Q.a22 = w;
-	Q.a10 = 0.f;
-	Q.a20 = 0.f;
-	Q.a21 = 0.f;
-	Q.b0 = -2.f * x * w;
-	Q.b1 = -2.f * y * w;
-	Q.b2 = -2.f * z * w;
+	Q.a10 = 0.0;
+	Q.a20 = 0.0;
+	Q.a21 = 0.0;
+	Q.b0 = -2.0 * x * w;
+	Q.b1 = -2.0 * y * w;
+	Q.b2 = -2.0 * z * w;
 	Q.c = (x * x + y * y + z * z) * w;
 	Q.w = w;
 }
@@ -583,7 +583,7 @@ static void fillFaceQuadrics(Quadric* vertex_quadrics, const datatype_t* indices
 		datatype_t i2 = indices[i + 2];
 
 		Quadric Q;
-		quadricFromTriangle(Q, vertex_positions[i0], vertex_positions[i1], vertex_positions[i2], 1.f);
+		quadricFromTriangle(Q, vertex_positions[i0], vertex_positions[i1], vertex_positions[i2], 1.0);
 
 		quadricAdd(vertex_quadrics[remap[i0]], Q);
 		quadricAdd(vertex_quadrics[remap[i1]], Q);
@@ -625,7 +625,7 @@ static void fillEdgeQuadrics(Quadric* vertex_quadrics, const datatype_t* indices
 
 			// we try hard to maintain border edge geometry; seam edges can move more freely
 			// due to topological restrictions on collapses, seam quadrics slightly improves collapse structure but aren't critical
-			const real_t kEdgeWeightSeam = 1.f;
+			const real_t kEdgeWeightSeam = 1.0;
 			const real_t kEdgeWeightBorder = 10.f;
 
 			real_t edgeWeight = (k0 == Kind_Border || k1 == Kind_Border) ? kEdgeWeightBorder : kEdgeWeightSeam;
@@ -791,7 +791,7 @@ static void dumpEdgeCollapses(const Collapse* collapses, size_t collapse_count, 
 	for (int k0 = 0; k0 < Kind_Count; ++k0)
 		for (int k1 = 0; k1 < Kind_Count; ++k1)
 			if (ckinds[k0][k1])
-				printf("collapses %d -> %d: %d, min error %e\n", k0, k1, int(ckinds[k0][k1]), ckinds[k0][k1] ? std::sqrt(cerrors[k0][k1]) : 0.f);
+				printf("collapses %d -> %d: %d, min error %e\n", k0, k1, int(ckinds[k0][k1]), ckinds[k0][k1] ? std::sqrt(cerrors[k0][k1]) : 0.0);
 }
 
 static void dumpLockedCollapses(const datatype_t* indices, size_t index_count, const unsigned char* vertex_kind)
@@ -886,7 +886,7 @@ static size_t performEdgeCollapses(datatype_t* collapse_remap, unsigned char* co
 
 		// we limit the error in each pass based on the error of optimal last collapse; since many collapses will be locked
 		// as they will share vertices with other successfull collapses, we need to increase the acceptable error by some factor
-		real_t error_goal = edge_collapse_goal < collapse_count ? 1.5f * collapses[collapse_order[edge_collapse_goal]].error : FLT_MAX;
+		real_t error_goal = edge_collapse_goal < collapse_count ? 1.5 * collapses[collapse_order[edge_collapse_goal]].error : FLT_MAX;
 
 		// on average, each collapse is expected to lock 6 other collapses; to avoid degenerate passes on meshes with odd
 		// topology, we only abort if we got over 1/6 collapses accordingly.
@@ -962,7 +962,7 @@ static size_t performEdgeCollapses(datatype_t* collapse_remap, unsigned char* co
 	}
 
 #if TRACE
-	real_t error_goal_perfect = edge_collapse_goal < collapse_count ? collapses[collapse_order[edge_collapse_goal]].error : 0.f;
+	real_t error_goal_perfect = edge_collapse_goal < collapse_count ? collapses[collapse_order[edge_collapse_goal]].error : 0.0;
 
 	printf("removed %d triangles, error %e (goal %e); evaluated %d/%d collapses (done %d, skipped %d, invalid %d)\n",
 	    int(triangle_collapses), std::sqrt(result_error), std::sqrt(error_goal_perfect),
@@ -1084,9 +1084,9 @@ static void computeVertexIds(datatype_t* vertex_ids, const Vector3* vertex_posit
 	{
 		const Vector3& v = vertex_positions[i];
 
-		int xi = int(v.x * cell_scale + 0.5f);
-		int yi = int(v.y * cell_scale + 0.5f);
-		int zi = int(v.z * cell_scale + 0.5f);
+		int xi = int(v.x * cell_scale + 0.5);
+		int yi = int(v.y * cell_scale + 0.5);
+		int zi = int(v.z * cell_scale + 0.5);
 
 		vertex_ids[i] = (xi << 20) | (yi << 10) | zi;
 	}
@@ -1169,7 +1169,7 @@ static void fillCellQuadrics(Quadric* cell_quadrics, const datatype_t* indices, 
 		bool single_cell = (c0 == c1) & (c0 == c2);
 
 		Quadric Q;
-		quadricFromTriangle(Q, vertex_positions[i0], vertex_positions[i1], vertex_positions[i2], single_cell ? 3.f : 1.f);
+		quadricFromTriangle(Q, vertex_positions[i0], vertex_positions[i1], vertex_positions[i2], single_cell ? 3.0 : 1.0);
 
 		if (single_cell)
 		{
@@ -1192,7 +1192,7 @@ static void fillCellQuadrics(Quadric* cell_quadrics, const Vector3* vertex_posit
 		const Vector3& v = vertex_positions[i];
 
 		Quadric Q;
-		quadricFromPoint(Q, v.x, v.y, v.z, 1.f);
+		quadricFromPoint(Q, v.x, v.y, v.z, 1.0);
 
 		quadricAdd(cell_quadrics[c], Q);
 	}
@@ -1448,7 +1448,7 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 	const int kInterpolationPasses = 5;
 
 	// invariant: # of triangles in min_grid <= target_count
-	int min_grid = int(1.f / (target_error < 1e-3f ? 1e-3f : target_error));
+	int min_grid = int(1.0 / (target_error < 1e-3f ? 1e-3f : target_error));
 	int max_grid = 1025;
 	size_t min_triangles = 0;
 	size_t max_triangles = index_count / 3;
@@ -1461,7 +1461,7 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 	}
 
 	// instead of starting in the middle, let's guess as to what the answer might be! triangle count usually grows as a square of grid size...
-	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5f);
+	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5);
 
 	for (int pass = 0; pass < 10 + kInterpolationPasses; ++pass)
 	{
@@ -1497,13 +1497,13 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 
 		// we start by using interpolation search - it usually converges faster
 		// however, interpolation search has a worst case of O(N) so we switch to binary search after a few iterations which converges in O(logN)
-		next_grid_size = (pass < kInterpolationPasses) ? int(tip + 0.5f) : (min_grid + max_grid) / 2;
+		next_grid_size = (pass < kInterpolationPasses) ? int(tip + 0.5) : (min_grid + max_grid) / 2;
 	}
 
 	if (min_triangles == 0)
 	{
 		if (out_result_error)
-			*out_result_error = 1.f;
+			*out_result_error = 1.0;
 
 		return 0;
 	}
@@ -1530,7 +1530,7 @@ size_t meshopt_simplifySloppy(datatype_t* destination, const datatype_t* indices
 	fillCellRemap(cell_remap, cell_errors, cell_count, vertex_cells, cell_quadrics, vertex_positions, vertex_count);
 
 	// compute error
-	real_t result_error = 0.f;
+	real_t result_error = 0.0;
 
 	for (size_t i = 0; i < cell_count; ++i)
 		result_error = result_error < cell_errors[i] ? cell_errors[i] : result_error;
@@ -1590,7 +1590,7 @@ size_t meshopt_simplifyPoints(datatype_t* destination, const real_t* vertex_posi
 	size_t max_vertices = vertex_count;
 
 	// instead of starting in the middle, let's guess as to what the answer might be! triangle count usually grows as a square of grid size...
-	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5f);
+	int next_grid_size = int(std::sqrt(real_t(target_cell_count)) + 0.5);
 
 	for (int pass = 0; pass < 10 + kInterpolationPasses; ++pass)
 	{
@@ -1629,7 +1629,7 @@ size_t meshopt_simplifyPoints(datatype_t* destination, const real_t* vertex_posi
 
 		// we start by using interpolation search - it usually converges faster
 		// however, interpolation search has a worst case of O(N) so we switch to binary search after a few iterations which converges in O(logN)
-		next_grid_size = (pass < kInterpolationPasses) ? int(tip + 0.5f) : (min_grid + max_grid) / 2;
+		next_grid_size = (pass < kInterpolationPasses) ? int(tip + 0.5) : (min_grid + max_grid) / 2;
 	}
 
 	if (min_vertices == 0)

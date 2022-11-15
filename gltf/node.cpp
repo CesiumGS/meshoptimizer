@@ -174,7 +174,7 @@ void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[
 	    m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
 	    m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 
-	real_t sign = (det < 0.f) ? -1.f : 1.f;
+	real_t sign = (det < 0.0) ? -1.0 : 1.0;
 
 	// recover scale from axis lengths
 	scale[0] = std::sqrt(m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0]) * sign;
@@ -182,9 +182,9 @@ void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[
 	scale[2] = std::sqrt(m[0][2] * m[0][2] + m[1][2] * m[1][2] + m[2][2] * m[2][2]) * sign;
 
 	// normalize axes to get a pure rotation matrix
-	real_t rsx = (scale[0] == 0.f) ? 0.f : 1.f / scale[0];
-	real_t rsy = (scale[1] == 0.f) ? 0.f : 1.f / scale[1];
-	real_t rsz = (scale[2] == 0.f) ? 0.f : 1.f / scale[2];
+	real_t rsx = (scale[0] == 0.0) ? 0.0 : 1.0 / scale[0];
+	real_t rsy = (scale[1] == 0.0) ? 0.0 : 1.0 / scale[1];
+	real_t rsz = (scale[2] == 0.0) ? 0.0 : 1.0 / scale[2];
 
 	real_t r00 = m[0][0] * rsx, r10 = m[1][0] * rsx, r20 = m[2][0] * rsx;
 	real_t r01 = m[0][1] * rsy, r11 = m[1][1] * rsy, r21 = m[2][1] * rsy;
@@ -192,12 +192,12 @@ void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[
 
 	// "branchless" version of Mike Day's matrix to quaternion conversion
 	int qc = r22 < 0 ? (r00 > r11 ? 0 : 1) : (r00 < -r11 ? 2 : 3);
-	real_t qs1 = qc & 2 ? -1.f : 1.f;
-	real_t qs2 = qc & 1 ? -1.f : 1.f;
-	real_t qs3 = (qc - 1) & 2 ? -1.f : 1.f;
+	real_t qs1 = qc & 2 ? -1.0 : 1.0;
+	real_t qs2 = qc & 1 ? -1.0 : 1.0;
+	real_t qs3 = (qc - 1) & 2 ? -1.0 : 1.0;
 
-	real_t qt = 1.f - qs3 * r00 - qs2 * r11 - qs1 * r22;
-	real_t qs = 0.5f / std::sqrt(qt);
+	real_t qt = 1.0 - qs3 * r00 - qs2 * r11 - qs1 * r22;
+	real_t qs = 0.5 / std::sqrt(qt);
 
 	rotation[qc ^ 0] = qs * qt;
 	rotation[qc ^ 1] = qs * (r01 + qs1 * r10);

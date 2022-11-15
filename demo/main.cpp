@@ -182,7 +182,7 @@ void dumpObj(const Mesh& mesh, bool recomputeNormals = false)
 			nz = normals[i * 3 + 2];
 
 			real_t l = std::sqrt(nx * nx + ny * ny + nz * nz);
-			real_t s = l == 0.f ? 0.f : 1.f / l;
+			real_t s = l == 0.0 ? 0.0 : 1.0 / l;
 
 			nx *= s;
 			ny *= s;
@@ -343,7 +343,7 @@ void optOverdraw(Mesh& mesh)
 {
 	// use worst-case ACMR threshold so that overdraw optimizer can sort *all* triangles
 	// warning: this significantly deteriorates the vertex cache efficiency so it is not advised; look at optComplete for the recommended method
-	const real_t kThreshold = 3.f;
+	const real_t kThreshold = 3.0;
 	meshopt_optimizeOverdraw(&mesh.indices[0], &mesh.indices[0], mesh.indices.size(), &mesh.vertices[0].px, mesh.vertices.size(), sizeof(Vertex), kThreshold);
 }
 
@@ -824,7 +824,7 @@ void meshlets(const Mesh& mesh, bool scan)
 {
 	const size_t max_vertices = 64;
 	const size_t max_triangles = 124; // NVidia-recommended 126, rounded down to a multiple of 4
-	const real_t cone_weight = 0.5f;   // note: should be set to 0 unless cone culling is used at runtime!
+	const real_t cone_weight = 0.5;   // note: should be set to 0 unless cone culling is used at runtime!
 
 	// note: input mesh is assumed to be optimized for vertex cache and vertex fetch
 	double start = timestamp();
@@ -898,7 +898,7 @@ void meshlets(const Mesh& mesh, bool scan)
 		real_t mviewlength = std::sqrt(mview[0] * mview[0] + mview[1] * mview[1] + mview[2] * mview[2]);
 
 		rejected += mview[0] * bounds.cone_axis[0] + mview[1] * bounds.cone_axis[1] + mview[2] * bounds.cone_axis[2] >= bounds.cone_cutoff * mviewlength;
-		rejected_s8 += mview[0] * (bounds.cone_axis_s8[0] / 127.f) + mview[1] * (bounds.cone_axis_s8[1] / 127.f) + mview[2] * (bounds.cone_axis_s8[2] / 127.f) >= (bounds.cone_cutoff_s8 / 127.f) * mviewlength;
+		rejected_s8 += mview[0] * (bounds.cone_axis_s8[0] / 127.0) + mview[1] * (bounds.cone_axis_s8[1] / 127.0) + mview[2] * (bounds.cone_axis_s8[2] / 127.0) >= (bounds.cone_cutoff_s8 / 127.0) * mviewlength;
 
 		// alternative formulation for perspective projection that doesn't use apex (and uses cluster bounding sphere instead):
 		// dot(normalize(center - camera_position), cone_axis) > cone_cutoff + radius / length(center - camera_position)
@@ -906,7 +906,7 @@ void meshlets(const Mesh& mesh, bool scan)
 		real_t cviewlength = std::sqrt(cview[0] * cview[0] + cview[1] * cview[1] + cview[2] * cview[2]);
 
 		rejected_alt += cview[0] * bounds.cone_axis[0] + cview[1] * bounds.cone_axis[1] + cview[2] * bounds.cone_axis[2] >= bounds.cone_cutoff * cviewlength + bounds.radius;
-		rejected_alt_s8 += cview[0] * (bounds.cone_axis_s8[0] / 127.f) + cview[1] * (bounds.cone_axis_s8[1] / 127.f) + cview[2] * (bounds.cone_axis_s8[2] / 127.f) >= (bounds.cone_cutoff_s8 / 127.f) * cviewlength + bounds.radius;
+		rejected_alt_s8 += cview[0] * (bounds.cone_axis_s8[0] / 127.0) + cview[1] * (bounds.cone_axis_s8[1] / 127.0) + cview[2] * (bounds.cone_axis_s8[2] / 127.0) >= (bounds.cone_cutoff_s8 / 127.0) * cviewlength + bounds.radius;
 	}
 	double endc = timestamp();
 

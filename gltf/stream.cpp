@@ -196,17 +196,17 @@ void getPositionBounds(real_t min[3], real_t max[3], const Stream& stream, const
 
 	if (settings.quantize)
 	{
-		if (settings.pos_real_t)
+		if (settings.pos_real)
 		{
 			for (int k = 0; k < 3; ++k)
 			{
-				min[k] = meshopt_quantizereal_t(min[k], qp.bits);
-				max[k] = meshopt_quantizereal_t(max[k], qp.bits);
+				min[k] = meshopt_quantizeReal(min[k], qp.bits);
+				max[k] = meshopt_quantizeReal(max[k], qp.bits);
 			}
 		}
 		else
 		{
-			real_t pos_rscale = qp.scale == 0.f ? 0.f : 1.f / qp.scale * (stream.target > 0 && qp.normalized ? 32767.f / 65535.f : 1.f);
+			real_t pos_rscale = qp.scale == 0.0 ? 0.0 : 1.0 / qp.scale * (stream.target > 0 && qp.normalized ? 32767.0 / 65535.f : 1.0);
 
 			for (int k = 0; k < 3; ++k)
 			{
@@ -217,8 +217,8 @@ void getPositionBounds(real_t min[3], real_t max[3], const Stream& stream, const
 				}
 				else
 				{
-					min[k] = (min[k] >= 0.f ? 1.f : -1.f) * real_t(meshopt_quantizeUnorm(std::abs(min[k]) * pos_rscale, qp.bits));
-					max[k] = (max[k] >= 0.f ? 1.f : -1.f) * real_t(meshopt_quantizeUnorm(std::abs(max[k]) * pos_rscale, qp.bits));
+					min[k] = (min[k] >= 0.0 ? 1.0 : -1.0) * real_t(meshopt_quantizeUnorm(std::abs(min[k]) * pos_rscale, qp.bits));
+					max[k] = (max[k] >= 0.0 ? 1.0 : -1.0) * real_t(meshopt_quantizeUnorm(std::abs(max[k]) * pos_rscale, qp.bits));
 				}
 			}
 		}
@@ -246,13 +246,13 @@ static void renormalizeWeights(uint8_t (&w)[4])
 static void encodeOct(int& fu, int& fv, real_t nx, real_t ny, real_t nz, int bits)
 {
 	real_t nl = std::abs(nx) + std::abs(ny) + std::abs(nz);
-	real_t ns = nl == 0.f ? 0.f : 1.f / nl;
+	real_t ns = nl == 0.0 ? 0.0 : 1.0 / nl;
 
 	nx *= ns;
 	ny *= ns;
 
-	real_t u = (nz >= 0.f) ? nx : (1 - std::abs(ny)) * (nx >= 0.f ? 1.f : -1.f);
-	real_t v = (nz >= 0.f) ? ny : (1 - std::abs(nx)) * (ny >= 0.f ? 1.f : -1.f);
+	real_t u = (nz >= 0.0) ? nx : (1 - std::abs(ny)) * (nx >= 0.0 ? 1.0 : -1.0);
+	real_t v = (nz >= 0.0) ? ny : (1 - std::abs(nx)) * (ny >= 0.0 ? 1.0 : -1.0);
 
 	fu = meshopt_quantizeSnorm(u, bits);
 	fv = meshopt_quantizeSnorm(v, bits);
@@ -260,7 +260,7 @@ static void encodeOct(int& fu, int& fv, real_t nx, real_t ny, real_t nz, int bit
 
 static void encodeQuat(int16_t v[4], const Attr& a, int bits)
 {
-	const real_t scaler = std::sqrt(2.f);
+	const real_t scaler = std::sqrt(2.0);
 
 	// establish maximum quaternion component
 	int qc = 0;
@@ -269,13 +269,13 @@ static void encodeQuat(int16_t v[4], const Attr& a, int bits)
 	qc = std::abs(a.f[3]) > std::abs(a.f[qc]) ? 3 : qc;
 
 	// we use double-cover properties to discard the sign
-	real_t sign = a.f[qc] < 0.f ? -1.f : 1.f;
+	real_t sign = a.f[qc] < 0.0 ? -1.0 : 1.0;
 
 	// note: we always encode a cyclical swizzle to be able to recover the order via rotation
 	v[0] = int16_t(meshopt_quantizeSnorm(a.f[(qc + 1) & 3] * scaler * sign, bits));
 	v[1] = int16_t(meshopt_quantizeSnorm(a.f[(qc + 2) & 3] * scaler * sign, bits));
 	v[2] = int16_t(meshopt_quantizeSnorm(a.f[(qc + 3) & 3] * scaler * sign, bits));
-	v[3] = int16_t((meshopt_quantizeSnorm(1.f, bits) & ~3) | qc);
+	v[3] = int16_t((meshopt_quantizeSnorm(1.0, bits) & ~3) | qc);
 }
 
 static void encodeExpShared(uint32_t v[3], const Attr& a, int bits)
@@ -291,9 +291,9 @@ static void encodeExpShared(uint32_t v[3], const Attr& a, int bits)
 	int exp = std::max(ex, std::max(ey, ez)) - (bits - 1);
 
 	// compute renormalized rounded mantissas for each component
-	int mx = int(ldexp(a.f[0], -exp) + (a.f[0] >= 0 ? 0.5f : -0.5f));
-	int my = int(ldexp(a.f[1], -exp) + (a.f[1] >= 0 ? 0.5f : -0.5f));
-	int mz = int(ldexp(a.f[2], -exp) + (a.f[2] >= 0 ? 0.5f : -0.5f));
+	int mx = int(ldexp(a.f[0], -exp) + (a.f[0] >= 0 ? 0.5 : -0.5));
+	int my = int(ldexp(a.f[1], -exp) + (a.f[1] >= 0 ? 0.5 : -0.5));
+	int mz = int(ldexp(a.f[2], -exp) + (a.f[2] >= 0 ? 0.5 : -0.5));
 
 	int mmask = (1 << 24) - 1;
 
@@ -313,7 +313,7 @@ static uint32_t encodeExpOne(real_t v, int bits)
 	int exp = e - (bits - 1);
 
 	// compute renormalized rounded mantissa
-	int m = int(ldexp(v, -exp) + (v >= 0 ? 0.5f : -0.5f));
+	int m = int(ldexp(v, -exp) + (v >= 0 ? 0.5 : -0.5));
 
 	int mmask = (1 << 24) - 1;
 
@@ -351,9 +351,9 @@ static void encodeExpParallel(std::string& bin, const Attr* data, size_t count, 
 		const Attr& a = data[i];
 
 		// compute renormalized rounded mantissas
-		int mx = int(ldexp(a.f[0], -expx) + (a.f[0] >= 0 ? 0.5f : -0.5f));
-		int my = int(ldexp(a.f[1], -expy) + (a.f[1] >= 0 ? 0.5f : -0.5f));
-		int mz = int(ldexp(a.f[2], -expz) + (a.f[2] >= 0 ? 0.5f : -0.5f));
+		int mx = int(ldexp(a.f[0], -expx) + (a.f[0] >= 0 ? 0.5 : -0.5));
+		int my = int(ldexp(a.f[1], -expy) + (a.f[1] >= 0 ? 0.5 : -0.5));
+		int mz = int(ldexp(a.f[2], -expz) + (a.f[2] >= 0 ? 0.5 : -0.5));
 
 		int mmask = (1 << 24) - 1;
 
@@ -399,7 +399,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 		if (!settings.quantize)
 			return writeVertexStreamRaw(bin, stream, cgltf_type_vec3, 3);
 
-		if (settings.pos_real_t)
+		if (settings.pos_real)
 		{
 			StreamFormat::Filter filter = settings.compress ? StreamFormat::Filter_Exp : StreamFormat::Filter_None;
 
@@ -424,9 +424,9 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 					else
 					{
 						real_t v[3] = {
-						    meshopt_quantizereal_t(a.f[0], qp.bits),
-						    meshopt_quantizereal_t(a.f[1], qp.bits),
-						    meshopt_quantizereal_t(a.f[2], qp.bits)};
+						    meshopt_quantizeReal(a.f[0], qp.bits),
+						    meshopt_quantizeReal(a.f[1], qp.bits),
+						    meshopt_quantizeReal(a.f[2], qp.bits)};
 						bin.append(reinterpret_cast<const char*>(v), sizeof(v));
 					}
 				}
@@ -438,7 +438,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 
 		if (stream.target == 0)
 		{
-			real_t pos_rscale = qp.scale == 0.f ? 0.f : 1.f / qp.scale;
+			real_t pos_rscale = qp.scale == 0.0 ? 0.0 : 1.0 / qp.scale;
 
 			for (size_t i = 0; i < stream.data.size(); ++i)
 			{
@@ -457,7 +457,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 		}
 		else
 		{
-			real_t pos_rscale = qp.scale == 0.f ? 0.f : 1.f / qp.scale * (qp.normalized ? 32767.f / 65535.f : 1.f);
+			real_t pos_rscale = qp.scale == 0.0 ? 0.0 : 1.0 / qp.scale * (qp.normalized ? 32767.0 / 65535.f : 1.0);
 
 			int maxv = 0;
 
@@ -477,9 +477,9 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 					const Attr& a = stream.data[i];
 
 					int8_t v[4] = {
-					    int8_t((a.f[0] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[0]) * pos_rscale, qp.bits)),
-					    int8_t((a.f[1] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[1]) * pos_rscale, qp.bits)),
-					    int8_t((a.f[2] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[2]) * pos_rscale, qp.bits)),
+					    int8_t((a.f[0] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[0]) * pos_rscale, qp.bits)),
+					    int8_t((a.f[1] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[1]) * pos_rscale, qp.bits)),
+					    int8_t((a.f[2] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[2]) * pos_rscale, qp.bits)),
 					    0};
 					bin.append(reinterpret_cast<const char*>(v), sizeof(v));
 				}
@@ -494,9 +494,9 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 					const Attr& a = stream.data[i];
 
 					int16_t v[4] = {
-					    int16_t((a.f[0] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[0]) * pos_rscale, qp.bits)),
-					    int16_t((a.f[1] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[1]) * pos_rscale, qp.bits)),
-					    int16_t((a.f[2] >= 0.f ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[2]) * pos_rscale, qp.bits)),
+					    int16_t((a.f[0] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[0]) * pos_rscale, qp.bits)),
+					    int16_t((a.f[1] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[1]) * pos_rscale, qp.bits)),
+					    int16_t((a.f[2] >= 0.0 ? 1 : -1) * meshopt_quantizeUnorm(std::abs(a.f[2]) * pos_rscale, qp.bits)),
 					    0};
 					bin.append(reinterpret_cast<const char*>(v), sizeof(v));
 				}
@@ -512,8 +512,8 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 			return writeVertexStreamRaw(bin, stream, cgltf_type_vec2, 2);
 
 		real_t uv_rscale[2] = {
-		    qt.scale[0] == 0.f ? 0.f : 1.f / qt.scale[0],
-		    qt.scale[1] == 0.f ? 0.f : 1.f / qt.scale[1],
+		    qt.scale[0] == 0.0 ? 0.0 : 1.0 / qt.scale[0],
+		    qt.scale[1] == 0.0 ? 0.0 : 1.0 / qt.scale[1],
 		};
 
 		for (size_t i = 0; i < stream.data.size(); ++i)
@@ -557,7 +557,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 
 					v[0] = int16_t(fu);
 					v[1] = int16_t(fv);
-					v[2] = int16_t(meshopt_quantizeSnorm(1.f, bits));
+					v[2] = int16_t(meshopt_quantizeSnorm(1.0, bits));
 					v[3] = 0;
 				}
 				else
@@ -581,7 +581,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 
 					v[0] = int8_t(fu);
 					v[1] = int8_t(fv);
-					v[2] = int8_t(meshopt_quantizeSnorm(1.f, bits));
+					v[2] = int8_t(meshopt_quantizeSnorm(1.0, bits));
 					v[3] = 0;
 				}
 				else
@@ -632,7 +632,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 
 				v[0] = int8_t(fu);
 				v[1] = int8_t(fv);
-				v[2] = int8_t(meshopt_quantizeSnorm(1.f, bits));
+				v[2] = int8_t(meshopt_quantizeSnorm(1.0, bits));
 				v[3] = int8_t(meshopt_quantizeSnorm(nw, bits));
 			}
 			else
@@ -697,7 +697,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 			const Attr& a = stream.data[i];
 
 			real_t ws = a.f[0] + a.f[1] + a.f[2] + a.f[3];
-			real_t wsi = (ws == 0.f) ? 0.f : 1.f / ws;
+			real_t wsi = (ws == 0.0) ? 0.0 : 1.0 / ws;
 
 			uint8_t v[4] = {
 			    uint8_t(meshopt_quantizeUnorm(a.f[0] * wsi, 8)),
@@ -705,7 +705,7 @@ StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const Qua
 			    uint8_t(meshopt_quantizeUnorm(a.f[2] * wsi, 8)),
 			    uint8_t(meshopt_quantizeUnorm(a.f[3] * wsi, 8))};
 
-			if (wsi != 0.f)
+			if (wsi != 0.0)
 				renormalizeWeights(v);
 
 			bin.append(reinterpret_cast<const char*>(v), sizeof(v));

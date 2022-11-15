@@ -132,7 +132,7 @@ static void computeBoundingSphere(real_t result[4], const real_t points[][3], si
 			real_t d = std::sqrt(d2);
 			assert(d > 0);
 
-			real_t k = 0.5f + (radius / d) / 2;
+			real_t k = 0.5 + (radius / d) / 2;
 
 			center[0] = center[0] * k + p[0] * (1 - k);
 			center[1] = center[1] * k + p[1] * (1 - k);
@@ -155,7 +155,7 @@ struct Cone
 
 static real_t getMeshletScore(real_t distance2, real_t spread, real_t cone_weight, real_t expected_radius)
 {
-	real_t cone = 1.f - spread * cone_weight;
+	real_t cone = 1.0 - spread * cone_weight;
 	real_t cone_clamped = cone < 1e-3f ? 1e-3f : cone;
 
 	return (1 + std::sqrt(distance2) / expected_radius * (1 - cone_weight)) * cone_clamped;
@@ -165,14 +165,14 @@ static Cone getMeshletCone(const Cone& acc, datatype_t triangle_count)
 {
 	Cone result = acc;
 
-	real_t center_scale = triangle_count == 0 ? 0.f : 1.f / real_t(triangle_count);
+	real_t center_scale = triangle_count == 0 ? 0.0 : 1.0 / real_t(triangle_count);
 
 	result.px *= center_scale;
 	result.py *= center_scale;
 	result.pz *= center_scale;
 
 	real_t axis_length = result.nx * result.nx + result.ny * result.ny + result.nz * result.nz;
-	real_t axis_scale = axis_length == 0.f ? 0.f : 1.f / std::sqrt(axis_length);
+	real_t axis_scale = axis_length == 0.0 ? 0.0 : 1.0 / std::sqrt(axis_length);
 
 	result.nx *= axis_scale;
 	result.ny *= axis_scale;
@@ -185,7 +185,7 @@ static real_t computeTriangleCones(Cone* triangles, const datatype_t* indices, s
 {
 	(void)vertex_count;
 
-	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
+	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 	size_t face_count = index_count / 3;
 
 	real_t mesh_area = 0;
@@ -195,9 +195,9 @@ static real_t computeTriangleCones(Cone* triangles, const datatype_t* indices, s
 		datatype_t a = indices[i * 3 + 0], b = indices[i * 3 + 1], c = indices[i * 3 + 2];
 		assert(a < vertex_count && b < vertex_count && c < vertex_count);
 
-		const real_t* p0 = vertex_positions + vertex_stride_real_t * a;
-		const real_t* p1 = vertex_positions + vertex_stride_real_t * b;
-		const real_t* p2 = vertex_positions + vertex_stride_real_t * c;
+		const real_t* p0 = vertex_positions + vertex_stride_real * a;
+		const real_t* p1 = vertex_positions + vertex_stride_real * b;
+		const real_t* p2 = vertex_positions + vertex_stride_real * c;
 
 		real_t p10[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
 		real_t p20[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
@@ -207,11 +207,11 @@ static real_t computeTriangleCones(Cone* triangles, const datatype_t* indices, s
 		real_t normalz = p10[0] * p20[1] - p10[1] * p20[0];
 
 		real_t area = std::sqrt(normalx * normalx + normaly * normaly + normalz * normalz);
-		real_t invarea = (area == 0.f) ? 0.f : 1.f / area;
+		real_t invarea = (area == 0.0) ? 0.0 : 1.0 / area;
 
-		triangles[i].px = (p0[0] + p1[0] + p2[0]) / 3.f;
-		triangles[i].py = (p0[1] + p1[1] + p2[1]) / 3.f;
-		triangles[i].pz = (p0[2] + p1[2] + p2[2]) / 3.f;
+		triangles[i].px = (p0[0] + p1[0] + p2[0]) / 3.0;
+		triangles[i].py = (p0[1] + p1[1] + p2[1]) / 3.0;
+		triangles[i].pz = (p0[2] + p1[2] + p2[2]) / 3.0;
 
 		triangles[i].nx = normalx * invarea;
 		triangles[i].ny = normaly * invarea;
@@ -357,7 +357,7 @@ static size_t kdtreeBuild(size_t offset, KDNode* nodes, size_t node_count, const
 	real_t runc = 1, runs = 1;
 
 	// gather statistics on the points in the subtree using Welford's algorithm
-	for (size_t i = 0; i < count; ++i, runc += 1.f, runs = 1.f / runc)
+	for (size_t i = 0; i < count; ++i, runc += 1.0, runs = 1.0 / runc)
 	{
 		const real_t* point = points + indices[i] * stride;
 
@@ -491,8 +491,8 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 	real_t mesh_area = computeTriangleCones(triangles, indices, index_count, vertex_positions, vertex_count, vertex_positions_stride);
 
 	// assuming each meshlet is a square patch, expected radius is sqrt(expected area)
-	real_t triangle_area_avg = face_count == 0 ? 0.f : mesh_area / real_t(face_count) * 0.5f;
-	real_t meshlet_expected_radius = std::sqrt(triangle_area_avg * max_triangles) * 0.5f;
+	real_t triangle_area_avg = face_count == 0 ? 0.0 : mesh_area / real_t(face_count) * 0.5;
+	real_t meshlet_expected_radius = std::sqrt(triangle_area_avg * max_triangles) * 0.5;
 
 	// build a kd-tree for nearest neighbor lookup
 	datatype_t* kdindices = allocator.allocate<datatype_t>(face_count);
@@ -696,7 +696,7 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 
 	(void)vertex_count;
 
-	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
+	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
 	// compute triangle normals and gather triangle corners
 	real_t normals[kMeshletMaxTriangles][3];
@@ -710,9 +710,9 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 		datatype_t c = indices[i + 2];
 		assert(a < vertex_count && b < vertex_count && c < vertex_count);
 
-		const real_t* p0 = vertex_positions + vertex_stride_real_t * a;
-		const real_t* p1 = vertex_positions + vertex_stride_real_t * b;
-		const real_t* p2 = vertex_positions + vertex_stride_real_t * c;
+		const real_t* p0 = vertex_positions + vertex_stride_real * a;
+		const real_t* p1 = vertex_positions + vertex_stride_real * b;
+		const real_t* p2 = vertex_positions + vertex_stride_real * c;
 
 		real_t p10[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
 		real_t p20[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
@@ -724,7 +724,7 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 		real_t area = std::sqrt(normalx * normalx + normaly * normaly + normalz * normalz);
 
 		// no need to include degenerate triangles - they will be invisible anyway
-		if (area == 0.f)
+		if (area == 0.0)
 			continue;
 
 		// record triangle normals & corners for future use; normal and corner 0 define a plane equation
@@ -755,14 +755,14 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 
 	real_t axis[3] = {nsphere[0], nsphere[1], nsphere[2]};
 	real_t axislength = std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
-	real_t invaxislength = axislength == 0.f ? 0.f : 1.f / axislength;
+	real_t invaxislength = axislength == 0.0 ? 0.0 : 1.0 / axislength;
 
 	axis[0] *= invaxislength;
 	axis[1] *= invaxislength;
 	axis[2] *= invaxislength;
 
 	// compute a tight cone around all normals, mindp = cos(angle/2)
-	real_t mindp = 1.f;
+	real_t mindp = 1.0;
 
 	for (size_t i = 0; i < triangles; ++i)
 	{
@@ -802,7 +802,7 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 		real_t dn = axis[0] * normals[i][0] + axis[1] * normals[i][1] + axis[2] * normals[i][2];
 
 		// dn should be larger than mindp cutoff above
-		assert(dn > 0.f);
+		assert(dn > 0.0);
 		real_t t = dc / dn;
 
 		maxt = (t > maxt) ? t : maxt;
@@ -828,9 +828,9 @@ meshopt_Bounds meshopt_computeClusterBounds(const datatype_t* indices, size_t in
 	bounds.cone_axis_s8[2] = (signed char)(meshopt_quantizeSnorm(bounds.cone_axis[2], 8));
 
 	// for the 8-bit test to be conservative, we need to adjust the cutoff by measuring the max. error
-	real_t cone_axis_s8_e0 = std::abs(bounds.cone_axis_s8[0] / 127.f - bounds.cone_axis[0]);
-	real_t cone_axis_s8_e1 = std::abs(bounds.cone_axis_s8[1] / 127.f - bounds.cone_axis[1]);
-	real_t cone_axis_s8_e2 = std::abs(bounds.cone_axis_s8[2] / 127.f - bounds.cone_axis[2]);
+	real_t cone_axis_s8_e0 = std::abs(bounds.cone_axis_s8[0] / 127.0 - bounds.cone_axis[0]);
+	real_t cone_axis_s8_e1 = std::abs(bounds.cone_axis_s8[1] / 127.0 - bounds.cone_axis[1]);
+	real_t cone_axis_s8_e2 = std::abs(bounds.cone_axis_s8[2] / 127.0 - bounds.cone_axis[2]);
 
 	// note that we need to round this up instead of rounding to nearest, hence +1
 	int cone_cutoff_s8 = int(127 * (bounds.cone_cutoff + cone_axis_s8_e0 + cone_axis_s8_e1 + cone_axis_s8_e2) + 1);

@@ -12,13 +12,13 @@ namespace meshopt
 
 static void calculateSortData(real_t* sort_data, const datatype_t* indices, size_t index_count, const real_t* vertex_positions, size_t vertex_positions_stride, const datatype_t* clusters, size_t cluster_count)
 {
-	size_t vertex_stride_real_t = vertex_positions_stride / sizeof(real_t);
+	size_t vertex_stride_real = vertex_positions_stride / sizeof(real_t);
 
 	real_t mesh_centroid[3] = {};
 
 	for (size_t i = 0; i < index_count; ++i)
 	{
-		const real_t* p = vertex_positions + vertex_stride_real_t * indices[i];
+		const real_t* p = vertex_positions + vertex_stride_real * indices[i];
 
 		mesh_centroid[0] += p[0];
 		mesh_centroid[1] += p[1];
@@ -41,9 +41,9 @@ static void calculateSortData(real_t* sort_data, const datatype_t* indices, size
 
 		for (size_t i = cluster_begin; i < cluster_end; i += 3)
 		{
-			const real_t* p0 = vertex_positions + vertex_stride_real_t * indices[i + 0];
-			const real_t* p1 = vertex_positions + vertex_stride_real_t * indices[i + 1];
-			const real_t* p2 = vertex_positions + vertex_stride_real_t * indices[i + 2];
+			const real_t* p0 = vertex_positions + vertex_stride_real * indices[i + 0];
+			const real_t* p1 = vertex_positions + vertex_stride_real * indices[i + 1];
+			const real_t* p2 = vertex_positions + vertex_stride_real * indices[i + 2];
 
 			real_t p10[3] = {p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]};
 			real_t p20[3] = {p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]};
@@ -70,7 +70,7 @@ static void calculateSortData(real_t* sort_data, const datatype_t* indices, size
 		cluster_centroid[2] *= inv_cluster_area;
 
 		real_t cluster_normal_length = std::sqrt(cluster_normal[0] * cluster_normal[0] + cluster_normal[1] * cluster_normal[1] + cluster_normal[2] * cluster_normal[2]);
-		real_t inv_cluster_normal_length = cluster_normal_length == 0 ? 0 : 1 / cluster_normal_length;
+		real_t inv_cluster_normal_length = cluster_normal_length == 0 ? 0.0 : 1.0 / cluster_normal_length;
 
 		cluster_normal[0] *= inv_cluster_normal_length;
 		cluster_normal[1] *= inv_cluster_normal_length;
@@ -99,7 +99,7 @@ static void calculateSortOrderRadix(datatype_t* sort_order, const real_t* sort_d
 	for (size_t i = 0; i < cluster_count; ++i)
 	{
 		// note that we flip distribution since high dot product should come first
-		real_t sort_key = 0.5f - 0.5f * (sort_data[i] / sort_data_max);
+		real_t sort_key = 0.5 - 0.5 * (sort_data[i] / sort_data_max);
 
 		sort_keys[i] = meshopt_quantizeUnorm(sort_key, sort_bits) & ((1 << sort_bits) - 1);
 	}

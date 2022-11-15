@@ -69,7 +69,7 @@ static cgltf_data* parseSceneObj(fastObjMesh* obj)
 		gm.pbr_metallic_roughness.metallic_factor = 0.0f;
 		gm.pbr_metallic_roughness.roughness_factor = 1.0f;
 
-		gm.alpha_cutoff = 0.5f;
+		gm.alpha_cutoff = 0.5;
 
 		if (om.map_Kd.name)
 		{
@@ -137,7 +137,7 @@ static void parseMeshObj(fastObjMesh* obj, datatype_t face_offset, datatype_t fa
 
 		if (tex_stream >= 0)
 		{
-			Attr t = {{obj->texcoords[ii.t * 2 + 0], 1.f - obj->texcoords[ii.t * 2 + 1]}};
+			Attr t = {{obj->texcoords[ii.t * 2 + 0], 1.0 - obj->texcoords[ii.t * 2 + 1]}};
 			mesh.streams[tex_stream].data[target] = t;
 		}
 	}

@@ -15,7 +15,7 @@ static real_t getDelta(const Attr& l, const Attr& r, cgltf_animation_path_type t
 		return std::max(std::max(std::abs(l.f[0] - r.f[0]), std::abs(l.f[1] - r.f[1])), std::abs(l.f[2] - r.f[2]));
 
 	case cgltf_animation_path_type_rotation:
-		return acosf(std::min(1.f, std::abs(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
+		return acosf(std::min(1.0, std::abs(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
 
 	case cgltf_animation_path_type_scale:
 		return std::max(std::max(std::abs(l.f[0] / r.f[0] - 1), std::abs(l.f[1] / r.f[1] - 1)), std::abs(l.f[2] / r.f[2] - 1));
@@ -62,8 +62,8 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_anim
 		real_t d = std::abs(ca);
 		real_t A = 1.0904f + d * (-3.2452f + d * (3.55645f - d * 1.43519f));
 		real_t B = 0.848013f + d * (-1.06021f + d * 0.215638f);
-		real_t k = A * (t - 0.5f) * (t - 0.5f) + B;
-		real_t ot = t + t * (t - 0.5f) * (t - 1) * k;
+		real_t k = A * (t - 0.5) * (t - 0.5) + B;
+		real_t ot = t + t * (t - 0.5) * (t - 1) * k;
 
 		real_t t0 = 1 - ot;
 		real_t t1 = ca > 0 ? ot : -ot;
@@ -77,7 +77,7 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_anim
 
 		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
-		if (len > 0.f)
+		if (len > 0.0)
 		{
 			lerp.f[0] /= len;
 			lerp.f[1] /= len;
@@ -121,7 +121,7 @@ static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, c
 	{
 		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
-		if (len > 0.f)
+		if (len > 0.0)
 		{
 			lerp.f[0] /= len;
 			lerp.f[1] /= len;
@@ -157,8 +157,8 @@ static void resampleKeyframes(std::vector<Attr>& data, const std::vector<real_t>
 			real_t next_time = input[cursor + 1];
 
 			real_t range = next_time - cursor_time;
-			real_t inv_range = (range == 0.f) ? 0.f : 1.f / (next_time - cursor_time);
-			real_t t = std::max(0.f, std::min(1.f, (time - cursor_time) * inv_range));
+			real_t inv_range = (range == 0.0) ? 0.0 : 1.0 / (next_time - cursor_time);
+			real_t t = std::max(0.0, std::min(1.0, (time - cursor_time) * inv_range));
 
 			for (size_t j = 0; j < components; ++j)
 			{
@@ -271,7 +271,7 @@ static real_t getWorldScale(cgltf_node* node)
 	real_t a2 = transform[4] * transform[9] - transform[5] * transform[8];
 	real_t det = transform[0] * a0 - transform[1] * a1 + transform[2] * a2;
 
-	return powf(std::abs(det), 1.f / 3.f);
+	return powf(std::abs(det), 1.0 / 3.0);
 }
 
 void processAnimation(Animation& animation, const Settings& settings)
@@ -315,7 +315,7 @@ void processAnimation(Animation& animation, const Settings& settings)
 		if (track.node && track.path == cgltf_animation_path_type_translation)
 		{
 			real_t scale = getWorldScale(track.node);
-			tolerance /= scale == 0.f ? 1.f : scale;
+			tolerance /= scale == 0.0 ? 1.0 : scale;
 		}
 
 		real_t deviation = getMaxDelta(track.data, track.path, frames, &track.data[0], track.components);

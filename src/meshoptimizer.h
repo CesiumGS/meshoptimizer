@@ -582,7 +582,7 @@ inline unsigned short meshopt_quantizeHalf(real_t v);
  * Generates +-inf for overflow, preserves NaN, flushes denormals to zero, rounds to nearest
  * Assumes N is in a valid mantissa precision range, which is 1..23
  */
-inline real_t meshopt_quantizereal_t(real_t v, int N);
+inline real_t meshopt_quantizeReal(real_t v, int N);
 #endif
 
 /**
@@ -661,14 +661,14 @@ inline int meshopt_quantizeUnorm(real_t v, int N)
 	v = (v >= 0) ? v : 0;
 	v = (v <= 1) ? v : 1;
 
-	return int(v * scale + 0.5f);
+	return int(v * scale + 0.5);
 }
 
 inline int meshopt_quantizeSnorm(real_t v, int N)
 {
 	const real_t scale = real_t((1 << (N - 1)) - 1);
 
-	real_t round = (v >= 0 ? 0.5f : -0.5f);
+	real_t round = (v >= 0 ? 0.5 : -0.5);
 
 	v = (v >= -1) ? v : -1;
 	v = (v <= +1) ? v : +1;
@@ -699,7 +699,7 @@ inline unsigned short meshopt_quantizeHalf(real_t v)
 	return (unsigned short)(s | h);
 }
 
-inline real_t meshopt_quantizereal_t(real_t v, int N)
+inline real_t meshopt_quantizeReal(real_t v, int N)
 {
 	union { real_t f; datatype_t ui; } u = {v};
 	datatype_t ui = u.ui;

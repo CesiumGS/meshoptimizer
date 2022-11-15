@@ -168,7 +168,7 @@ static void writeTextureInfo(std::string& json, const cgltf_data* data, const cg
 
 	bool has_transform = false;
 	cgltf_texture_transform transform = {};
-	transform.scale[0] = transform.scale[1] = 1.f;
+	transform.scale[0] = transform.scale[1] = 1.0;
 
 	if (hasValidTransform(view))
 	{
@@ -180,8 +180,8 @@ static void writeTextureInfo(std::string& json, const cgltf_data* data, const cg
 	{
 		transform.offset[0] += qt->offset[0];
 		transform.offset[1] += qt->offset[1];
-		transform.scale[0] *= qt->scale[0] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
-		transform.scale[1] *= qt->scale[1] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.f);
+		transform.scale[0] *= qt->scale[0] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.0);
+		transform.scale[1] *= qt->scale[1] / real_t((1 << qt->bits) - 1) * (qt->normalized ? 65535.f : 1.0);
 		has_transform = true;
 	}
 
@@ -211,7 +211,7 @@ static void writeTextureInfo(std::string& json, const cgltf_data* data, const cg
 		append(json, ",");
 		append(json, transform.scale[1]);
 		append(json, "]");
-		if (transform.rotation != 0.f)
+		if (transform.rotation != 0.0)
 		{
 			append(json, ",\"rotation\":");
 			append(json, transform.rotation);
@@ -470,7 +470,7 @@ static void writeMaterialComponent(std::string& json, const cgltf_data* data, co
 	if (tm.thickness_factor != 0)
 	{
 		// thickness is in mesh coordinate space which is rescaled by quantization
-		real_t node_scale = qp ? qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f) : 1.f;
+		real_t node_scale = qp ? qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.0) : 1.0;
 
 		comma(json);
 		append(json, "\"thicknessFactor\":");
@@ -610,7 +610,7 @@ void writeMaterial(std::string& json, const cgltf_data* data, const cgltf_materi
 		append(json, "\"");
 	}
 
-	if (material.alpha_cutoff != 0.5f)
+	if (material.alpha_cutoff != 0.5)
 	{
 		comma(json);
 		append(json, "\"alphaCutoff\":");
@@ -1023,12 +1023,12 @@ size_t writeJointBindMatrices(std::vector<BufferView>& views, std::string& json_
 
 		if (skin.inverse_bind_matrices)
 		{
-			cgltf_accessor_read_real_t(skin.inverse_bind_matrices, j, transform, 16);
+			cgltf_accessor_read_real(skin.inverse_bind_matrices, j, transform, 16);
 		}
 
-		if (settings.quantize && !settings.pos_real_t)
+		if (settings.quantize && !settings.pos_real)
 		{
-			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
+			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.0);
 
 			// pos_offset has to be applied first, thus it results in an offset rotated by the bind matrix
 			transform[12] += qp.offset[0] * transform[0] + qp.offset[1] * transform[4] + qp.offset[2] * transform[8];
@@ -1083,11 +1083,11 @@ size_t writeInstances(std::vector<BufferView>& views, std::string& json_accessor
 	{
 		decomposeTransform(position[i].f, rotation[i].f, scale[i].f, transforms[i].data);
 
-		if (settings.quantize && !settings.pos_real_t)
+		if (settings.quantize && !settings.pos_real)
 		{
 			const real_t* transform = transforms[i].data;
 
-			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.f);
+			real_t node_scale = qp.scale / real_t((1 << qp.bits) - 1) * (qp.normalized ? 65535.f : 1.0);
 
 			// pos_offset has to be applied first, thus it results in an offset rotated by the instance matrix
 			position[i].f[0] += qp.offset[0] * transform[0] + qp.offset[1] * transform[4] + qp.offset[2] * transform[8];
@@ -1123,7 +1123,7 @@ void writeMeshNode(std::string& json, size_t mesh_offset, cgltf_node* node, cglt
 	}
 	if (qp)
 	{
-		real_t node_scale = qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.f);
+		real_t node_scale = qp->scale / real_t((1 << qp->bits) - 1) * (qp->normalized ? 65535.f : 1.0);
 
 		append(json, ",\"translation\":[");
 		append(json, qp->offset[0]);
@@ -1370,11 +1370,11 @@ void writeAnimation(std::string& json, std::vector<BufferView>& views, std::stri
 
 	assert(int(needs_time) + int(needs_pose) + int(needs_range) <= 2);
 
-	real_t animation_period = 1.f / real_t(settings.anim_freq);
+	real_t animation_period = 1.0 / real_t(settings.anim_freq);
 	real_t animation_length = real_t(animation.frames - 1) * animation_period;
 
 	size_t time_accr = needs_time ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, animation.frames, animation_period, settings) : 0;
-	size_t pose_accr = needs_pose ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, 1, 0.f, settings) : 0;
+	size_t pose_accr = needs_pose ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, 1, 0.0, settings) : 0;
 	size_t range_accr = needs_range ? writeAnimationTime(views, json_accessors, accr_offset, animation.start, 2, animation_length, settings) : 0;
 
 	std::string json_samplers;
@@ -1465,12 +1465,12 @@ void writeCamera(std::string& json, const cgltf_camera& camera)
 		append(json, camera.data.perspective.yfov);
 		append(json, ",\"znear\":");
 		append(json, camera.data.perspective.znear);
-		if (camera.data.perspective.aspect_ratio != 0.f)
+		if (camera.data.perspective.aspect_ratio != 0.0)
 		{
 			append(json, ",\"aspectRatio\":");
 			append(json, camera.data.perspective.aspect_ratio);
 		}
-		if (camera.data.perspective.zfar != 0.f)
+		if (camera.data.perspective.zfar != 0.0)
 		{
 			append(json, ",\"zfar\":");
 			append(json, camera.data.perspective.zfar);
@@ -1515,13 +1515,13 @@ void writeLight(std::string& json, const cgltf_light& light)
 		append(json, light.color[2]);
 		append(json, "]");
 	}
-	if (light.intensity != 1.f)
+	if (light.intensity != 1.0)
 	{
 		comma(json);
 		append(json, "\"intensity\":");
 		append(json, light.intensity);
 	}
-	if (light.range != 0.f)
+	if (light.range != 0.0)
 	{
 		comma(json);
 		append(json, "\"range\":");
@@ -1534,7 +1534,7 @@ void writeLight(std::string& json, const cgltf_light& light)
 		append(json, "\"innerConeAngle\":");
 		append(json, light.spot_inner_cone_angle);
 		append(json, ",\"outerConeAngle\":");
-		append(json, light.spot_outer_cone_angle == 0.f ? 0.78539816339f : light.spot_outer_cone_angle);
+		append(json, light.spot_outer_cone_angle == 0.0 ? 0.78539816339f : light.spot_outer_cone_angle);
 		append(json, "}");
 	}
 	append(json, "}");

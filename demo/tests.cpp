@@ -654,7 +654,7 @@ void encodeFilterOct8()
 	meshopt_decodeFilterOct(decoded, 4, 4);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(std::abs(decoded[i] / 127.f - data[i]) < 1e-2f);
+		assert(std::abs(decoded[i] / 127.0 - data[i]) < 1e-2f);
 }
 
 void encodeFilterOct12()
@@ -683,7 +683,7 @@ void encodeFilterOct12()
 	meshopt_decodeFilterOct(decoded, 4, 8);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(std::abs(decoded[i] / 32767.f - data[i]) < 1e-3f);
+		assert(std::abs(decoded[i] / 32767.0 - data[i]) < 1e-3f);
 }
 
 void encodeFilterQuat12()
@@ -713,10 +713,10 @@ void encodeFilterQuat12()
 
 	for (size_t i = 0; i < 4; ++i)
 	{
-		real_t dx = decoded[i * 4 + 0] / 32767.f;
-		real_t dy = decoded[i * 4 + 1] / 32767.f;
-		real_t dz = decoded[i * 4 + 2] / 32767.f;
-		real_t dw = decoded[i * 4 + 3] / 32767.f;
+		real_t dx = decoded[i * 4 + 0] / 32767.0;
+		real_t dy = decoded[i * 4 + 1] / 32767.0;
+		real_t dz = decoded[i * 4 + 2] / 32767.0;
+		real_t dw = decoded[i * 4 + 3] / 32767.0;
 
 		real_t dp =
 		    data[i * 4 + 0] * dx +
@@ -724,7 +724,7 @@ void encodeFilterQuat12()
 		    data[i * 4 + 2] * dz +
 		    data[i * 4 + 3] * dw;
 
-		assert(std::abs(std::abs(dp) - 1.f) < 1e-4f);
+		assert(std::abs(std::abs(dp) - 1.0) < 1e-4f);
 	}
 }
 
@@ -844,7 +844,7 @@ static void emptyMesh()
 {
 	meshopt_optimizeVertexCache(0, 0, 0, 0);
 	meshopt_optimizeVertexCacheFifo(0, 0, 0, 0, 16);
-	meshopt_optimizeOverdraw(0, 0, 0, 0, 0, 12, 1.f);
+	meshopt_optimizeOverdraw(0, 0, 0, 0, 0, 12, 1.0);
 }
 
 static void simplifyStuck()
@@ -856,7 +856,7 @@ static void simplifyStuck()
 	assert(meshopt_simplify(ib1, ib1, 12, vb1, 4, 12, 6, 1e-3f) == 12);
 
 	// 5-vertex strip can't be simplified due to topology restriction since middle triangle has flipped winding
-	real_t vb2[] = {0, 0, 0, 1, 0, 0, 2, 0, 0, 0.5f, 1, 0, 1.5f, 1, 0};
+	real_t vb2[] = {0, 0, 0, 1, 0, 0, 2, 0, 0, 0.5, 1, 0, 1.5, 1, 0};
 	datatype_t ib2[] = {0, 1, 3, 3, 1, 4, 1, 2, 4}; // ok
 	datatype_t ib3[] = {0, 1, 3, 1, 3, 4, 1, 2, 4}; // flipped
 
@@ -884,10 +884,10 @@ static void simplifySloppyStuck()
 	datatype_t* target = NULL;
 
 	// simplifying down to 0 triangles results in 0 immediately
-	assert(meshopt_simplifySloppy(target, ib, 3, vb, 3, 12, 0, 0.f) == 0);
+	assert(meshopt_simplifySloppy(target, ib, 3, vb, 3, 12, 0, 0.0) == 0);
 
 	// simplifying down to 2 triangles given that all triangles are degenerate results in 0 as well
-	assert(meshopt_simplifySloppy(target, ib, 6, vb, 3, 12, 6, 0.f) == 0);
+	assert(meshopt_simplifySloppy(target, ib, 6, vb, 3, 12, 6, 0.0) == 0);
 }
 
 static void simplifyPointsStuck()
@@ -949,7 +949,7 @@ static void simplifyScale()
 {
 	const real_t vb[] = {0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3};
 
-	assert(meshopt_simplifyScale(vb, 4, 12) == 3.f);
+	assert(meshopt_simplifyScale(vb, 4, 12) == 3.0);
 }
 
 static void simplifyDegenerate()

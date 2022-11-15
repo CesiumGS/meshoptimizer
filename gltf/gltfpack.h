@@ -109,7 +109,7 @@ struct Settings
 	int col_bits;
 
 	bool pos_normalized;
-	bool pos_real_t;
+	bool pos_real;
 
 	int trn_bits;
 	int rot_bits;

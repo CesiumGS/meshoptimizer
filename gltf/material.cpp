@@ -13,13 +13,13 @@ static bool areTextureViewsEqual(const cgltf_texture_view& lhs, const cgltf_text
 		const cgltf_texture_transform& lt = lhs.transform;
 		const cgltf_texture_transform& rt = rhs.transform;
 
-		if (memcmp(lt.offset, rt.offset, sizeof(cgltf_real_t) * 2) != 0)
+		if (memcmp(lt.offset, rt.offset, sizeof(cgltf_real) * 2) != 0)
 			return false;
 
 		if (lt.rotation != rt.rotation)
 			return false;
 
-		if (memcmp(lt.scale, rt.scale, sizeof(cgltf_real_t) * 2) != 0)
+		if (memcmp(lt.scale, rt.scale, sizeof(cgltf_real) * 2) != 0)
 			return false;
 
 		if (lt.texcoord != rt.texcoord)
@@ -54,7 +54,7 @@ static bool areMaterialComponentsEqual(const cgltf_pbr_metallic_roughness& lhs, 
 	if (!areTextureViewsEqual(lhs.metallic_roughness_texture, rhs.metallic_roughness_texture))
 		return false;
 
-	if (memcmp(lhs.base_color_factor, rhs.base_color_factor, sizeof(cgltf_real_t) * 4) != 0)
+	if (memcmp(lhs.base_color_factor, rhs.base_color_factor, sizeof(cgltf_real) * 4) != 0)
 		return false;
 
 	if (lhs.metallic_factor != rhs.metallic_factor)
@@ -74,10 +74,10 @@ static bool areMaterialComponentsEqual(const cgltf_pbr_specular_glossiness& lhs,
 	if (!areTextureViewsEqual(lhs.specular_glossiness_texture, rhs.specular_glossiness_texture))
 		return false;
 
-	if (memcmp(lhs.diffuse_factor, rhs.diffuse_factor, sizeof(cgltf_real_t) * 4) != 0)
+	if (memcmp(lhs.diffuse_factor, rhs.diffuse_factor, sizeof(cgltf_real) * 4) != 0)
 		return false;
 
-	if (memcmp(lhs.specular_factor, rhs.specular_factor, sizeof(cgltf_real_t) * 3) != 0)
+	if (memcmp(lhs.specular_factor, rhs.specular_factor, sizeof(cgltf_real) * 3) != 0)
 		return false;
 
 	if (lhs.glossiness_factor != rhs.glossiness_factor)
@@ -136,7 +136,7 @@ static bool areMaterialComponentsEqual(const cgltf_specular& lhs, const cgltf_sp
 	if (lhs.specular_factor != rhs.specular_factor)
 		return false;
 
-	if (memcmp(lhs.specular_color_factor, rhs.specular_color_factor, sizeof(cgltf_real_t) * 3) != 0)
+	if (memcmp(lhs.specular_color_factor, rhs.specular_color_factor, sizeof(cgltf_real) * 3) != 0)
 		return false;
 
 	return true;
@@ -147,7 +147,7 @@ static bool areMaterialComponentsEqual(const cgltf_sheen& lhs, const cgltf_sheen
 	if (!areTextureViewsEqual(lhs.sheen_color_texture, rhs.sheen_color_texture))
 		return false;
 
-	if (memcmp(lhs.sheen_color_factor, rhs.sheen_color_factor, sizeof(cgltf_real_t) * 3) != 0)
+	if (memcmp(lhs.sheen_color_factor, rhs.sheen_color_factor, sizeof(cgltf_real) * 3) != 0)
 		return false;
 
 	if (!areTextureViewsEqual(lhs.sheen_roughness_texture, rhs.sheen_roughness_texture))
@@ -167,7 +167,7 @@ static bool areMaterialComponentsEqual(const cgltf_volume& lhs, const cgltf_volu
 	if (lhs.thickness_factor != rhs.thickness_factor)
 		return false;
 
-	if (memcmp(lhs.attenuation_color, rhs.attenuation_color, sizeof(cgltf_real_t) * 3) != 0)
+	if (memcmp(lhs.attenuation_color, rhs.attenuation_color, sizeof(cgltf_real) * 3) != 0)
 		return false;
 
 	if (lhs.attenuation_distance != rhs.attenuation_distance)
@@ -278,7 +278,7 @@ static bool areMaterialsEqual(const cgltf_material& lhs, const cgltf_material& r
 	if (!areTextureViewsEqual(lhs.emissive_texture, rhs.emissive_texture))
 		return false;
 
-	if (memcmp(lhs.emissive_factor, rhs.emissive_factor, sizeof(cgltf_real_t) * 3) != 0)
+	if (memcmp(lhs.emissive_factor, rhs.emissive_factor, sizeof(cgltf_real) * 3) != 0)
 		return false;
 
 	if (lhs.alpha_mode != rhs.alpha_mode)
@@ -490,7 +490,7 @@ static real_t getAlphaFactor(const cgltf_material& material)
 	if (material.has_pbr_specular_glossiness)
 		return material.pbr_specular_glossiness.diffuse_factor[3];
 
-	return 1.f;
+	return 1.0;
 }
 
 static int getChannels(const cgltf_image& image, ImageInfo& info, const char* input_path)
@@ -518,7 +518,7 @@ void optimizeMaterials(cgltf_data* data, const char* input_path, std::vector<Ima
 			const cgltf_texture_view* color = getColorTexture(data->materials[i]);
 			real_t alpha = getAlphaFactor(data->materials[i]);
 
-			if (alpha == 1.f && !(color && color->texture && color->texture->image && getChannels(*color->texture->image, images[color->texture->image - data->images], input_path) == 4))
+			if (alpha == 1.0 && !(color && color->texture && color->texture->image && getChannels(*color->texture->image, images[color->texture->image - data->images], input_path) == 4))
 			{
 				data->materials[i].alpha_mode = cgltf_alpha_mode_opaque;
 			}
