@@ -3,3 +3,4 @@
 /gltf/library.wasm
 /.idea/
 /cmake-build-*/
+Makefile

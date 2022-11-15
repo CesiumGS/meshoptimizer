@@ -20,7 +20,7 @@
 
 struct Attr
 {
-	float f[4];
+	real_t f[4];
 };
 
 struct Stream
@@ -34,7 +34,7 @@ struct Stream
 
 struct Transform
 {
-	float data[16];
+	real_t data[16];
 };
 
 struct Mesh
@@ -49,10 +49,10 @@ struct Mesh
 	cgltf_primitive_type type;
 
 	std::vector<Stream> streams;
-	std::vector<unsigned int> indices;
+	std::vector<datatype_t> indices;
 
 	size_t targets;
-	std::vector<float> target_weights;
+	std::vector<real_t> target_weights;
 	std::vector<const char*> target_names;
 
 	std::vector<cgltf_material_mapping> variants;
@@ -70,7 +70,7 @@ struct Track
 
 	cgltf_interpolation_type interpolation;
 
-	std::vector<float> time; // empty for resampled or constant animations
+	std::vector<real_t> time; // empty for resampled or constant animations
 	std::vector<Attr> data;
 };
 
@@ -78,7 +78,7 @@ struct Animation
 {
 	const char* name;
 
-	float start;
+	real_t start;
 	int frames;
 
 	std::vector<Track> tracks;
@@ -109,7 +109,7 @@ struct Settings
 	int col_bits;
 
 	bool pos_normalized;
-	bool pos_float;
+	bool pos_real;
 
 	int trn_bits;
 	int rot_bits;
@@ -125,9 +125,9 @@ struct Settings
 	bool mesh_merge;
 	bool mesh_instancing;
 
-	float simplify_threshold;
+	real_t simplify_threshold;
 	bool simplify_aggressive;
-	float simplify_debug;
+	real_t simplify_debug;
 
 	int meshlet_debug;
 
@@ -136,7 +136,7 @@ struct Settings
 
 	bool texture_pow2;
 	bool texture_flipy;
-	float texture_scale;
+	real_t texture_scale;
 	int texture_limit;
 
 	TextureMode texture_mode[TextureKind__Count];
@@ -155,16 +155,16 @@ struct Settings
 
 struct QuantizationPosition
 {
-	float offset[3];
-	float scale;
+	real_t offset[3];
+	real_t scale;
 	int bits;
 	bool normalized;
 };
 
 struct QuantizationTexture
 {
-	float offset[2];
-	float scale[2];
+	real_t offset[2];
+	real_t scale[2];
 	int bits;
 	bool normalized;
 };
@@ -193,7 +193,7 @@ struct NodeInfo
 	bool keep;
 	bool animated;
 
-	unsigned int animated_paths;
+	datatype_t animated_paths;
 
 	int remap;
 
@@ -210,7 +210,7 @@ struct MaterialInfo
 
 	bool usesTextureTransform;
 	bool needsTangents;
-	unsigned int textureSetMask;
+	datatype_t textureSetMask;
 
 	int remap;
 };
@@ -290,7 +290,7 @@ cgltf_data* parseGltf(const char* path, std::vector<Mesh>& meshes, std::vector<A
 void processAnimation(Animation& animation, const Settings& settings);
 void processMesh(Mesh& mesh, const Settings& settings);
 
-void debugSimplify(const Mesh& mesh, Mesh& kinds, Mesh& loops, float ratio);
+void debugSimplify(const Mesh& mesh, Mesh& kinds, Mesh& loops, real_t ratio);
 void debugMeshlets(const Mesh& mesh, Mesh& meshlets, Mesh& bounds, int max_vertices, bool scan);
 
 bool compareMeshTargets(const Mesh& lhs, const Mesh& rhs);
@@ -324,15 +324,15 @@ void markScenes(cgltf_data* data, std::vector<NodeInfo>& nodes);
 void markAnimated(cgltf_data* data, std::vector<NodeInfo>& nodes, const std::vector<Animation>& animations);
 void markNeededNodes(cgltf_data* data, std::vector<NodeInfo>& nodes, const std::vector<Mesh>& meshes, const std::vector<Animation>& animations, const Settings& settings);
 void remapNodes(cgltf_data* data, std::vector<NodeInfo>& nodes, size_t& node_offset);
-void decomposeTransform(float translation[3], float rotation[4], float scale[3], const float* transform);
+void decomposeTransform(real_t translation[3], real_t rotation[4], real_t scale[3], const real_t* transform);
 
 QuantizationPosition prepareQuantizationPosition(const std::vector<Mesh>& meshes, const Settings& settings);
 void prepareQuantizationTexture(cgltf_data* data, std::vector<QuantizationTexture>& result, std::vector<size_t>& indices, const std::vector<Mesh>& meshes, const Settings& settings);
-void getPositionBounds(float min[3], float max[3], const Stream& stream, const QuantizationPosition& qp, const Settings& settings);
+void getPositionBounds(real_t min[3], real_t max[3], const Stream& stream, const QuantizationPosition& qp, const Settings& settings);
 
 StreamFormat writeVertexStream(std::string& bin, const Stream& stream, const QuantizationPosition& qp, const QuantizationTexture& qt, const Settings& settings);
-StreamFormat writeIndexStream(std::string& bin, const std::vector<unsigned int>& stream);
-StreamFormat writeTimeStream(std::string& bin, const std::vector<float>& data);
+StreamFormat writeIndexStream(std::string& bin, const std::vector<datatype_t>& stream);
+StreamFormat writeTimeStream(std::string& bin, const std::vector<real_t>& data);
 StreamFormat writeKeyframeStream(std::string& bin, cgltf_animation_path_type type, const std::vector<Attr>& data, const Settings& settings);
 
 void compressVertexStream(std::string& bin, const std::string& data, size_t count, size_t stride);
@@ -343,7 +343,7 @@ size_t getBufferView(std::vector<BufferView>& views, BufferView::Kind kind, Stre
 
 void comma(std::string& s);
 void append(std::string& s, size_t v);
-void append(std::string& s, float v);
+void append(std::string& s, real_t v);
 void append(std::string& s, const char* v);
 void append(std::string& s, const std::string& v);
 void appendJson(std::string& s, const char* data);

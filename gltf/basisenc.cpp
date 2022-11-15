@@ -20,20 +20,20 @@ struct BasisSettings
 	int etc1s_l;
 	int etc1s_q;
 	int uastc_l;
-	float uastc_q;
+	real_t uastc_q;
 };
 
 static const BasisSettings kBasisSettings[10] = {
-    {1, 1, 0, 1.5f},
-    {1, 6, 0, 1.f},
-    {1, 20, 1, 1.0f},
-    {1, 50, 1, 0.75f},
-    {1, 90, 1, 0.5f},
-    {1, 128, 1, 0.4f},
-    {1, 160, 1, 0.34f},
-    {1, 192, 1, 0.29f}, // default
-    {1, 224, 2, 0.26f},
-    {1, 255, 2, 0.f},
+    {1, 1, 0, 1.5},
+    {1, 6, 0, 1.0},
+    {1, 20, 1, 1.0},
+    {1, 50, 1, 0.75},
+    {1, 90, 1, 0.5},
+    {1, 128, 1, 0.4},
+    {1, 160, 1, 0.34},
+    {1, 192, 1, 0.29}, // default
+    {1, 224, 2, 0.26},
+    {1, 255, 2, 0.0},
 };
 
 static void fillParams(basisu::basis_compressor_params& params, const char* input, const char* output, bool uastc, int width, int height, const BasisSettings& bs, const ImageInfo& info, const Settings& settings)

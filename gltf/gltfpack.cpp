@@ -244,7 +244,7 @@ static bool printReport(const char* path, cgltf_data* data, const std::vector<Bu
 static bool canTransformMesh(const Mesh& mesh)
 {
 	// volume thickness is specified in mesh coordinate space; to avoid modifying materials we prohibit transforming meshes with volume materials
-	if (mesh.material && mesh.material->has_volume && mesh.material->volume.thickness_factor > 0.f)
+	if (mesh.material && mesh.material->has_volume && mesh.material->volume.thickness_factor > 0.0)
 		return false;
 
 	return true;
@@ -507,7 +507,7 @@ static void process(cgltf_data* data, const char* input_path, const char* output
 
 		comma(json_materials);
 		append(json_materials, "{");
-		writeMaterial(json_materials, data, material, settings.quantize && !settings.pos_float ? &qp : NULL, settings.quantize ? &qt_materials[i] : NULL);
+		writeMaterial(json_materials, data, material, settings.quantize && !settings.pos_real ? &qp : NULL, settings.quantize ? &qt_materials[i] : NULL);
 		if (settings.keep_extras)
 			writeExtras(json_materials, material.extras);
 		append(json_materials, "}");
@@ -656,7 +656,7 @@ static void process(cgltf_data* data, const char* input_path, const char* output
 				assert(ni.keep);
 
 				// if we don't use position quantization, prefer attaching the mesh to its node directly
-				if (!ni.has_mesh && (!settings.quantize || settings.pos_float))
+				if (!ni.has_mesh && (!settings.quantize || settings.pos_real))
 				{
 					ni.has_mesh = true;
 					ni.mesh_index = mesh_offset;
@@ -666,7 +666,7 @@ static void process(cgltf_data* data, const char* input_path, const char* output
 				{
 					ni.mesh_nodes.push_back(node_offset);
 
-					writeMeshNode(json_nodes, mesh_offset, mesh.nodes[j], mesh.skin, data, settings.quantize && !settings.pos_float ? &qp : NULL);
+					writeMeshNode(json_nodes, mesh_offset, mesh.nodes[j], mesh.skin, data, settings.quantize && !settings.pos_real ? &qp : NULL);
 
 					node_offset++;
 				}
@@ -691,7 +691,7 @@ static void process(cgltf_data* data, const char* input_path, const char* output
 			comma(json_roots[mesh.scene]);
 			append(json_roots[mesh.scene], node_offset);
 
-			writeMeshNode(json_nodes, mesh_offset, NULL, mesh.skin, data, settings.quantize && !settings.pos_float ? &qp : NULL);
+			writeMeshNode(json_nodes, mesh_offset, NULL, mesh.skin, data, settings.quantize && !settings.pos_real ? &qp : NULL);
 
 			node_offset++;
 		}
@@ -1120,8 +1120,8 @@ Settings defaults()
 	settings.rot_bits = 12;
 	settings.scl_bits = 16;
 	settings.anim_freq = 30;
-	settings.simplify_threshold = 1.f;
-	settings.texture_scale = 1.f;
+	settings.simplify_threshold = 1.0;
+	settings.texture_scale = 1.0;
 	for (int kind = 0; kind < TextureKind__Count; ++kind)
 		settings.texture_quality[kind] = 8;
 
@@ -1134,9 +1134,9 @@ T clamp(T v, T min, T max)
 	return v < min ? min : v > max ? max : v;
 }
 
-unsigned int textureMask(const char* arg)
+datatype_t textureMask(const char* arg)
 {
-	unsigned int result = 0;
+	datatype_t result = 0;
 
 	while (arg)
 	{
@@ -1198,17 +1198,17 @@ int main(int argc, char** argv)
 		}
 		else if (strcmp(arg, "-vpi") == 0)
 		{
-			settings.pos_float = false;
+			settings.pos_real = false;
 			settings.pos_normalized = false;
 		}
 		else if (strcmp(arg, "-vpn") == 0)
 		{
-			settings.pos_float = false;
+			settings.pos_real = false;
 			settings.pos_normalized = true;
 		}
 		else if (strcmp(arg, "-vpf") == 0)
 		{
-			settings.pos_float = true;
+			settings.pos_real = true;
 		}
 		else if (strcmp(arg, "-at") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
@@ -1252,7 +1252,7 @@ int main(int argc, char** argv)
 		}
 		else if (strcmp(arg, "-si") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
-			settings.simplify_threshold = clamp(float(atof(argv[++i])), 0.f, 1.f);
+			settings.simplify_threshold = clamp(real_t(std::atof(argv[++i])), 0.0, 1.0);
 		}
 		else if (strcmp(arg, "-sa") == 0)
 		{
@@ -1261,7 +1261,7 @@ int main(int argc, char** argv)
 #ifndef NDEBUG
 		else if (strcmp(arg, "-sd") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
-			settings.simplify_debug = clamp(float(atof(argv[++i])), 0.f, 1.f);
+			settings.simplify_debug = clamp(real_t(std::atof(argv[++i])), 0.0, 1.0);
 		}
 		else if (strcmp(arg, "-md") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
@@ -1272,7 +1272,7 @@ int main(int argc, char** argv)
 		{
 			settings.texture_ktx2 = true;
 
-			unsigned int mask = ~0u;
+			datatype_t mask = ALL_BITS_ONE;
 			if (i + 1 < argc && isalpha(argv[i + 1][0]))
 				mask = textureMask(argv[++i]);
 
@@ -1284,7 +1284,7 @@ int main(int argc, char** argv)
 		{
 			settings.texture_ktx2 = true;
 
-			unsigned int mask = ~0u;
+			datatype_t mask = ALL_BITS_ONE;
 			if (i + 1 < argc && isalpha(argv[i + 1][0]))
 				mask = textureMask(argv[++i]);
 
@@ -1300,7 +1300,7 @@ int main(int argc, char** argv)
 		}
 		else if (strcmp(arg, "-tq") == 0 && i + 2 < argc && isalpha(argv[i + 1][0]) && isdigit(argv[i + 2][0]))
 		{
-			unsigned int mask = textureMask(argv[++i]);
+			datatype_t mask = textureMask(argv[++i]);
 			int quality = clamp(atoi(argv[++i]), 1, 10);
 
 			for (int kind = 0; kind < TextureKind__Count; ++kind)
@@ -1309,7 +1309,7 @@ int main(int argc, char** argv)
 		}
 		else if (strcmp(arg, "-ts") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
-			settings.texture_scale = clamp(float(atof(argv[++i])), 0.f, 1.f);
+			settings.texture_scale = clamp(real_t(std::atof(argv[++i])), 0.0, 1.0);
 		}
 		else if (strcmp(arg, "-tl") == 0 && i + 1 < argc && isdigit(argv[i + 1][0]))
 		{
@@ -1516,7 +1516,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	if (settings.fallback && settings.pos_float)
+	if (settings.fallback && settings.pos_real)
 	{
 		fprintf(stderr, "Option -cf can not be used together with -vpf\n");
 		return 1;

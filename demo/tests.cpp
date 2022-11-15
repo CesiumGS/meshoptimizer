@@ -21,7 +21,7 @@ struct PV
 // note: 4 6 5 triangle here is a combo-breaker:
 // we encode it without rotating, a=next, c=next - this means we do *not* bump next to 6
 // which means that the next triangle can't be encoded via next sequencing!
-static const unsigned int kIndexBuffer[] = {0, 1, 2, 2, 1, 3, 4, 6, 5, 7, 8, 9};
+static const datatype_t kIndexBuffer[] = {0, 1, 2, 2, 1, 3, 4, 6, 5, 7, 8, 9};
 
 static const unsigned char kIndexDataV0[] = {
     0xe0, 0xf0, 0x10, 0xfe, 0xff, 0xf0, 0x0c, 0xff, 0x02, 0x02, 0x02, 0x00, 0x76, 0x87, 0x56, 0x67,
@@ -29,14 +29,14 @@ static const unsigned char kIndexDataV0[] = {
 };
 
 // note: this exercises two features of v1 format, restarts (0 1 2) and last
-static const unsigned int kIndexBufferTricky[] = {0, 1, 2, 2, 1, 3, 0, 1, 2, 2, 1, 5, 2, 1, 4};
+static const datatype_t kIndexBufferTricky[] = {0, 1, 2, 2, 1, 3, 0, 1, 2, 2, 1, 5, 2, 1, 4};
 
 static const unsigned char kIndexDataV1[] = {
     0xe1, 0xf0, 0x10, 0xfe, 0x1f, 0x3d, 0x00, 0x0a, 0x00, 0x76, 0x87, 0x56, 0x67, 0x78, 0xa9, 0x86,
     0x65, 0x89, 0x68, 0x98, 0x01, 0x69, 0x00, 0x00, // clang-format :-/
 };
 
-static const unsigned int kIndexSequence[] = {0, 1, 51, 2, 49, 1000};
+static const datatype_t kIndexSequence[] = {0, 1, 51, 2, 49, 1000};
 
 static const unsigned char kIndexSequenceV1[] = {
     0xd1, 0x00, 0x04, 0xcd, 0x01, 0x04, 0x07, 0x98, 0x1f, 0x00, 0x00, 0x00, 0x00, // clang-format :-/
@@ -64,7 +64,7 @@ static void decodeIndexV0()
 
 	std::vector<unsigned char> buffer(kIndexDataV0, kIndexDataV0 + sizeof(kIndexDataV0));
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &buffer[0], buffer.size()) == 0);
 	assert(memcmp(decoded, kIndexBuffer, sizeof(kIndexBuffer)) == 0);
 }
@@ -75,7 +75,7 @@ static void decodeIndexV1()
 
 	std::vector<unsigned char> buffer(kIndexDataV1, kIndexDataV1 + sizeof(kIndexDataV1));
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &buffer[0], buffer.size()) == 0);
 	assert(memcmp(decoded, kIndexBufferTricky, sizeof(kIndexBufferTricky)) == 0);
 }
@@ -125,7 +125,7 @@ static void decodeIndexMemorySafe()
 	buffer.resize(meshopt_encodeIndexBuffer(&buffer[0], buffer.size(), kIndexBuffer, index_count));
 
 	// check that decode is memory-safe; note that we reallocate the buffer for each try to make sure ASAN can verify buffer access
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 
 	for (size_t i = 0; i <= buffer.size(); ++i)
 	{
@@ -151,7 +151,7 @@ static void decodeIndexRejectExtraBytes()
 	std::vector<unsigned char> largebuffer(buffer);
 	largebuffer.push_back(0);
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &largebuffer[0], largebuffer.size()) < 0);
 }
 
@@ -167,7 +167,7 @@ static void decodeIndexRejectMalformedHeaders()
 	std::vector<unsigned char> brokenbuffer(buffer);
 	brokenbuffer[0] = 0;
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &brokenbuffer[0], brokenbuffer.size()) < 0);
 }
 
@@ -183,7 +183,7 @@ static void decodeIndexRejectInvalidVersion()
 	std::vector<unsigned char> brokenbuffer(buffer);
 	brokenbuffer[0] |= 0x0f;
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &brokenbuffer[0], brokenbuffer.size()) < 0);
 }
 
@@ -196,7 +196,7 @@ static void decodeIndexMalformedVByte()
 	    0x20, 0x20, 0x20, // clang-format :-/
 	};
 
-	unsigned int decoded[66];
+	datatype_t decoded[66];
 	assert(meshopt_decodeIndexBuffer(decoded, 66, input, sizeof(input)) < 0);
 }
 
@@ -208,7 +208,7 @@ static void roundtripIndexTricky()
 	std::vector<unsigned char> buffer(meshopt_encodeIndexBufferBound(index_count, vertex_count));
 	buffer.resize(meshopt_encodeIndexBuffer(&buffer[0], buffer.size(), kIndexBufferTricky, index_count));
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexBuffer(decoded, index_count, &buffer[0], buffer.size()) == 0);
 	assert(memcmp(decoded, kIndexBufferTricky, sizeof(kIndexBufferTricky)) == 0);
 }
@@ -218,7 +218,7 @@ static void encodeIndexEmpty()
 	std::vector<unsigned char> buffer(meshopt_encodeIndexBufferBound(0, 0));
 	buffer.resize(meshopt_encodeIndexBuffer(&buffer[0], buffer.size(), NULL, 0));
 
-	assert(meshopt_decodeIndexBuffer(static_cast<unsigned int*>(NULL), 0, &buffer[0], buffer.size()) == 0);
+	assert(meshopt_decodeIndexBuffer(static_cast<datatype_t*>(NULL), 0, &buffer[0], buffer.size()) == 0);
 }
 
 static void decodeIndexSequence()
@@ -227,7 +227,7 @@ static void decodeIndexSequence()
 
 	std::vector<unsigned char> buffer(kIndexSequenceV1, kIndexSequenceV1 + sizeof(kIndexSequenceV1));
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexSequence(decoded, index_count, &buffer[0], buffer.size()) == 0);
 	assert(memcmp(decoded, kIndexSequence, sizeof(kIndexSequence)) == 0);
 }
@@ -277,7 +277,7 @@ static void decodeIndexSequenceMemorySafe()
 	buffer.resize(meshopt_encodeIndexSequence(&buffer[0], buffer.size(), kIndexSequence, index_count));
 
 	// check that decode is memory-safe; note that we reallocate the buffer for each try to make sure ASAN can verify buffer access
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 
 	for (size_t i = 0; i <= buffer.size(); ++i)
 	{
@@ -303,7 +303,7 @@ static void decodeIndexSequenceRejectExtraBytes()
 	std::vector<unsigned char> largebuffer(buffer);
 	largebuffer.push_back(0);
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexSequence(decoded, index_count, &largebuffer[0], largebuffer.size()) < 0);
 }
 
@@ -319,7 +319,7 @@ static void decodeIndexSequenceRejectMalformedHeaders()
 	std::vector<unsigned char> brokenbuffer(buffer);
 	brokenbuffer[0] = 0;
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexSequence(decoded, index_count, &brokenbuffer[0], brokenbuffer.size()) < 0);
 }
 
@@ -335,7 +335,7 @@ static void decodeIndexSequenceRejectInvalidVersion()
 	std::vector<unsigned char> brokenbuffer(buffer);
 	brokenbuffer[0] |= 0x0f;
 
-	unsigned int decoded[index_count];
+	datatype_t decoded[index_count];
 	assert(meshopt_decodeIndexSequence(decoded, index_count, &brokenbuffer[0], brokenbuffer.size()) < 0);
 }
 
@@ -344,7 +344,7 @@ static void encodeIndexSequenceEmpty()
 	std::vector<unsigned char> buffer(meshopt_encodeIndexSequenceBound(0, 0));
 	buffer.resize(meshopt_encodeIndexSequence(&buffer[0], buffer.size(), NULL, 0));
 
-	assert(meshopt_decodeIndexSequence(static_cast<unsigned int*>(NULL), 0, &buffer[0], buffer.size()) == 0);
+	assert(meshopt_decodeIndexSequence(static_cast<datatype_t*>(NULL), 0, &buffer[0], buffer.size()) == 0);
 }
 
 static void decodeVertexV0()
@@ -601,14 +601,14 @@ static void decodeFilterQuat12()
 
 static void decodeFilterExp()
 {
-	const unsigned int data[4] = {
+	const datatype_t data[4] = {
 	    0,
 	    0xff000003,
 	    0x02fffff7,
 	    0xfe7fffff, // clang-format :-/
 	};
 
-	const unsigned int expected[4] = {
+	const datatype_t expected[4] = {
 	    0,
 	    0x3fc00000,
 	    0xc2100000,
@@ -616,13 +616,13 @@ static void decodeFilterExp()
 	};
 
 	// Aligned by 4
-	unsigned int full[4];
+	datatype_t full[4];
 	memcpy(full, data, sizeof(full));
 	meshopt_decodeFilterExp(full, 4, 4);
 	assert(memcmp(full, expected, sizeof(full)) == 0);
 
 	// Tail processing for unaligned data
-	unsigned int tail[3];
+	datatype_t tail[3];
 	memcpy(tail, data, sizeof(tail));
 	meshopt_decodeFilterExp(tail, 3, 4);
 	assert(memcmp(tail, expected, sizeof(tail)) == 0);
@@ -630,7 +630,7 @@ static void decodeFilterExp()
 
 void encodeFilterOct8()
 {
-	const float data[4 * 4] = {
+	const real_t data[4 * 4] = {
 	    1, 0, 0, 0,
 	    0, -1, 0, 0,
 	    0.7071068f, 0, 0.707168f, 1,
@@ -654,12 +654,12 @@ void encodeFilterOct8()
 	meshopt_decodeFilterOct(decoded, 4, 4);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(fabsf(decoded[i] / 127.f - data[i]) < 1e-2f);
+		assert(std::abs(decoded[i] / 127.0 - data[i]) < 1e-2f);
 }
 
 void encodeFilterOct12()
 {
-	const float data[4 * 4] = {
+	const real_t data[4 * 4] = {
 	    1, 0, 0, 0,
 	    0, -1, 0, 0,
 	    0.7071068f, 0, 0.707168f, 1,
@@ -683,12 +683,12 @@ void encodeFilterOct12()
 	meshopt_decodeFilterOct(decoded, 4, 8);
 
 	for (size_t i = 0; i < 4 * 4; ++i)
-		assert(fabsf(decoded[i] / 32767.f - data[i]) < 1e-3f);
+		assert(std::abs(decoded[i] / 32767.0 - data[i]) < 1e-3f);
 }
 
 void encodeFilterQuat12()
 {
-	const float data[4 * 4] = {
+	const real_t data[4 * 4] = {
 	    1, 0, 0, 0,
 	    0, -1, 0, 0,
 	    0.7071068f, 0, 0, 0.707168f,
@@ -713,53 +713,53 @@ void encodeFilterQuat12()
 
 	for (size_t i = 0; i < 4; ++i)
 	{
-		float dx = decoded[i * 4 + 0] / 32767.f;
-		float dy = decoded[i * 4 + 1] / 32767.f;
-		float dz = decoded[i * 4 + 2] / 32767.f;
-		float dw = decoded[i * 4 + 3] / 32767.f;
+		real_t dx = decoded[i * 4 + 0] / 32767.0;
+		real_t dy = decoded[i * 4 + 1] / 32767.0;
+		real_t dz = decoded[i * 4 + 2] / 32767.0;
+		real_t dw = decoded[i * 4 + 3] / 32767.0;
 
-		float dp =
+		real_t dp =
 		    data[i * 4 + 0] * dx +
 		    data[i * 4 + 1] * dy +
 		    data[i * 4 + 2] * dz +
 		    data[i * 4 + 3] * dw;
 
-		assert(fabsf(fabsf(dp) - 1.f) < 1e-4f);
+		assert(std::abs(std::abs(dp) - 1.0) < 1e-4f);
 	}
 }
 
 void encodeFilterExp()
 {
-	const float data[3] = {
+	const real_t data[3] = {
 	    1,
 	    -23.4f,
-	    -0.1f,
+	    -0.1,
 	};
 
-	const unsigned int expected[3] = {
+	const datatype_t expected[3] = {
 	    0xf7000200,
 	    0xf7ffd133,
 	    0xf7ffffcd,
 	};
 
-	unsigned int encoded[3];
+	datatype_t encoded[3];
 	meshopt_encodeFilterExp(encoded, 1, 12, 15, data);
 
 	assert(memcmp(encoded, expected, sizeof(expected)) == 0);
 
-	float decoded[3];
+	real_t decoded[3];
 	memcpy(decoded, encoded, sizeof(decoded));
 	meshopt_decodeFilterExp(decoded, 3, 4);
 
 	for (size_t i = 0; i < 3; ++i)
-		assert(fabsf(decoded[i] - data[i]) < 1e-3f);
+		assert(std::abs(decoded[i] - data[i]) < 1e-3f);
 }
 
 static void clusterBoundsDegenerate()
 {
-	const float vbd[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-	const unsigned int ibd[] = {0, 0, 0};
-	const unsigned int ib1[] = {0, 1, 2};
+	const real_t vbd[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	const datatype_t ibd[] = {0, 0, 0};
+	const datatype_t ib1[] = {0, 1, 2};
 
 	// all of the bounds below are degenerate as they use 0 triangles, one topology-degenerate triangle and one position-degenerate triangle respectively
 	meshopt_Bounds bounds0 = meshopt_computeClusterBounds(0, 0, 0, 0, 12);
@@ -770,8 +770,8 @@ static void clusterBoundsDegenerate()
 	assert(boundsd.center[0] == 0 && boundsd.center[1] == 0 && boundsd.center[2] == 0 && boundsd.radius == 0);
 	assert(bounds1.center[0] == 0 && bounds1.center[1] == 0 && bounds1.center[2] == 0 && bounds1.radius == 0);
 
-	const float vb1[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-	const unsigned int ib2[] = {0, 1, 2, 0, 2, 1};
+	const real_t vb1[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+	const datatype_t ib2[] = {0, 1, 2, 0, 2, 1};
 
 	// these bounds have a degenerate cone since the cluster has two triangles with opposite normals
 	meshopt_Bounds bounds2 = meshopt_computeClusterBounds(ib2, 6, vb1, 3, 12);
@@ -811,8 +811,8 @@ static void customAllocator()
 
 	assert(allocCount == 0 && freeCount == 0);
 
-	float vb[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-	unsigned int ib[] = {0, 1, 2};
+	real_t vb[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+	datatype_t ib[] = {0, 1, 2};
 	unsigned short ibs[] = {0, 1, 2};
 
 	// meshopt_computeClusterBounds doesn't allocate
@@ -844,55 +844,55 @@ static void emptyMesh()
 {
 	meshopt_optimizeVertexCache(0, 0, 0, 0);
 	meshopt_optimizeVertexCacheFifo(0, 0, 0, 0, 16);
-	meshopt_optimizeOverdraw(0, 0, 0, 0, 0, 12, 1.f);
+	meshopt_optimizeOverdraw(0, 0, 0, 0, 0, 12, 1.0);
 }
 
 static void simplifyStuck()
 {
 	// tetrahedron can't be simplified due to collapse error restrictions
-	float vb1[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
-	unsigned int ib1[] = {0, 1, 2, 0, 2, 3, 0, 3, 1, 2, 1, 3};
+	real_t vb1[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+	datatype_t ib1[] = {0, 1, 2, 0, 2, 3, 0, 3, 1, 2, 1, 3};
 
 	assert(meshopt_simplify(ib1, ib1, 12, vb1, 4, 12, 6, 1e-3f) == 12);
 
 	// 5-vertex strip can't be simplified due to topology restriction since middle triangle has flipped winding
-	float vb2[] = {0, 0, 0, 1, 0, 0, 2, 0, 0, 0.5f, 1, 0, 1.5f, 1, 0};
-	unsigned int ib2[] = {0, 1, 3, 3, 1, 4, 1, 2, 4}; // ok
-	unsigned int ib3[] = {0, 1, 3, 1, 3, 4, 1, 2, 4}; // flipped
+	real_t vb2[] = {0, 0, 0, 1, 0, 0, 2, 0, 0, 0.5, 1, 0, 1.5, 1, 0};
+	datatype_t ib2[] = {0, 1, 3, 3, 1, 4, 1, 2, 4}; // ok
+	datatype_t ib3[] = {0, 1, 3, 1, 3, 4, 1, 2, 4}; // flipped
 
 	assert(meshopt_simplify(ib2, ib2, 9, vb2, 5, 12, 6, 1e-3f) == 6);
 	assert(meshopt_simplify(ib3, ib3, 9, vb2, 5, 12, 6, 1e-3f) == 9);
 
 	// 4-vertex quad with a locked corner can't be simplified due to border error-induced restriction
-	float vb4[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0};
-	unsigned int ib4[] = {0, 1, 3, 0, 3, 2};
+	real_t vb4[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0};
+	datatype_t ib4[] = {0, 1, 3, 0, 3, 2};
 
 	assert(meshopt_simplify(ib4, ib4, 6, vb4, 4, 12, 3, 1e-3f) == 6);
 
 	// 4-vertex quad with a locked corner can't be simplified due to border error-induced restriction
-	float vb5[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0};
-	unsigned int ib5[] = {0, 1, 4, 0, 3, 2};
+	real_t vb5[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0};
+	datatype_t ib5[] = {0, 1, 4, 0, 3, 2};
 
 	assert(meshopt_simplify(ib5, ib5, 6, vb5, 5, 12, 3, 1e-3f) == 6);
 }
 
 static void simplifySloppyStuck()
 {
-	const float vb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-	const unsigned int ib[] = {0, 1, 2, 0, 1, 2};
+	const real_t vb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	const datatype_t ib[] = {0, 1, 2, 0, 1, 2};
 
-	unsigned int* target = NULL;
+	datatype_t* target = NULL;
 
 	// simplifying down to 0 triangles results in 0 immediately
-	assert(meshopt_simplifySloppy(target, ib, 3, vb, 3, 12, 0, 0.f) == 0);
+	assert(meshopt_simplifySloppy(target, ib, 3, vb, 3, 12, 0, 0.0) == 0);
 
 	// simplifying down to 2 triangles given that all triangles are degenerate results in 0 as well
-	assert(meshopt_simplifySloppy(target, ib, 6, vb, 3, 12, 6, 0.f) == 0);
+	assert(meshopt_simplifySloppy(target, ib, 6, vb, 3, 12, 6, 0.0) == 0);
 }
 
 static void simplifyPointsStuck()
 {
-	const float vb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	const real_t vb[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	// simplifying down to 0 points results in 0 immediately
 	assert(meshopt_simplifyPoints(0, vb, 3, 12, 0) == 0);
@@ -904,7 +904,7 @@ static void simplifyFlip()
 	// and progressively collapsing edges until the only ones left violate border or flip constraints.
 	// there is only one valid non-flip collapse, so we validate that we take it; when flips are allowed,
 	// the wrong collapse is picked instead.
-	float vb[] = {
+	real_t vb[] = {
 	    1.000000f, 1.000000f, -1.000000f,
 	    1.000000f, 1.000000f, 1.000000f,
 	    1.000000f, -1.000000f, 1.000000f,
@@ -917,7 +917,7 @@ static void simplifyFlip()
 	};
 
 	// the collapse we expect is 7 -> 0
-	unsigned int ib[] = {
+	datatype_t ib[] = {
 	    7, 4, 3,
 	    1, 2, 5,
 	    7, 1, 6,
@@ -930,7 +930,7 @@ static void simplifyFlip()
 	    7, 0, 1, // gets removed
 	};
 
-	unsigned int expected[] = {
+	datatype_t expected[] = {
 	    0, 4, 3,
 	    1, 2, 5,
 	    0, 1, 6,
@@ -947,14 +947,14 @@ static void simplifyFlip()
 
 static void simplifyScale()
 {
-	const float vb[] = {0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3};
+	const real_t vb[] = {0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3};
 
-	assert(meshopt_simplifyScale(vb, 4, 12) == 3.f);
+	assert(meshopt_simplifyScale(vb, 4, 12) == 3.0);
 }
 
 static void simplifyDegenerate()
 {
-	float vb[] = {
+	real_t vb[] = {
 	    0.000000f, 0.000000f, 0.000000f,
 	    0.000000f, 1.000000f, 0.000000f,
 	    0.000000f, 2.000000f, 0.000000f,
@@ -967,7 +967,7 @@ static void simplifyDegenerate()
 	// 3 5
 	// 4
 
-	unsigned int ib[] = {
+	datatype_t ib[] = {
 	    0, 1, 3,
 	    3, 1, 5,
 	    1, 2, 5,
@@ -976,7 +976,7 @@ static void simplifyDegenerate()
 	    0, 3, 0, // which breaks border classification
 	};
 
-	unsigned int expected[] = {
+	datatype_t expected[] = {
 	    0, 1, 4,
 	    4, 1, 2, // clang-format :-/
 	};
@@ -987,7 +987,7 @@ static void simplifyDegenerate()
 
 static void simplifyLockBorder()
 {
-	float vb[] = {
+	real_t vb[] = {
 	    0.000000f, 0.000000f, 0.000000f,
 	    0.000000f, 1.000000f, 0.000000f,
 	    0.000000f, 2.000000f, 0.000000f,
@@ -1003,7 +1003,7 @@ static void simplifyLockBorder()
 	// 3 4 5
 	// 6 7 8
 
-	unsigned int ib[] = {
+	datatype_t ib[] = {
 	    0, 1, 3,
 	    3, 1, 4,
 	    1, 2, 4,
@@ -1014,7 +1014,7 @@ static void simplifyLockBorder()
 	    7, 5, 8, // clang-format :-/
 	};
 
-	unsigned int expected[] = {
+	datatype_t expected[] = {
 	    0, 1, 3,
 	    1, 2, 3,
 	    3, 2, 5,
@@ -1031,13 +1031,13 @@ static void adjacency()
 {
 	// 0 1/4
 	// 2/5 3
-	const float vb[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0};
-	const unsigned int ib[] = {0, 1, 2, 5, 4, 3};
+	const real_t vb[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0};
+	const datatype_t ib[] = {0, 1, 2, 5, 4, 3};
 
-	unsigned int adjib[12];
+	datatype_t adjib[12];
 	meshopt_generateAdjacencyIndexBuffer(adjib, ib, 6, vb, 6, 12);
 
-	unsigned int expected[] = {
+	datatype_t expected[] = {
 	    // patch 0
 	    0, 0,
 	    1, 3,
@@ -1058,13 +1058,13 @@ static void tessellation()
 {
 	// 0 1/4
 	// 2/5 3
-	const float vb[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0};
-	const unsigned int ib[] = {0, 1, 2, 5, 4, 3};
+	const real_t vb[] = {0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0};
+	const datatype_t ib[] = {0, 1, 2, 5, 4, 3};
 
-	unsigned int tessib[24];
+	datatype_t tessib[24];
 	meshopt_generateTessellationIndexBuffer(tessib, ib, 6, vb, 6, 12);
 
-	unsigned int expected[] = {
+	datatype_t expected[] = {
 	    // patch 0
 	    0, 1, 2,
 	    0, 1,

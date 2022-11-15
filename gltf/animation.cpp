@@ -7,21 +7,21 @@
 #include <math.h>
 #include <string.h>
 
-static float getDelta(const Attr& l, const Attr& r, cgltf_animation_path_type type)
+static real_t getDelta(const Attr& l, const Attr& r, cgltf_animation_path_type type)
 {
 	switch (type)
 	{
 	case cgltf_animation_path_type_translation:
-		return std::max(std::max(fabsf(l.f[0] - r.f[0]), fabsf(l.f[1] - r.f[1])), fabsf(l.f[2] - r.f[2]));
+		return std::max(std::max(std::abs(l.f[0] - r.f[0]), std::abs(l.f[1] - r.f[1])), std::abs(l.f[2] - r.f[2]));
 
 	case cgltf_animation_path_type_rotation:
-		return acosf(std::min(1.f, fabsf(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
+		return acosf(std::min(1.0, std::abs(l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3])));
 
 	case cgltf_animation_path_type_scale:
-		return std::max(std::max(fabsf(l.f[0] / r.f[0] - 1), fabsf(l.f[1] / r.f[1] - 1)), fabsf(l.f[2] / r.f[2] - 1));
+		return std::max(std::max(std::abs(l.f[0] / r.f[0] - 1), std::abs(l.f[1] / r.f[1] - 1)), std::abs(l.f[2] / r.f[2] - 1));
 
 	case cgltf_animation_path_type_weights:
-		return fabsf(l.f[0] - r.f[0]);
+		return std::abs(l.f[0] - r.f[0]);
 
 	default:
 		assert(!"Uknown animation path");
@@ -29,21 +29,21 @@ static float getDelta(const Attr& l, const Attr& r, cgltf_animation_path_type ty
 	}
 }
 
-static float getDeltaTolerance(cgltf_animation_path_type type)
+static real_t getDeltaTolerance(cgltf_animation_path_type type)
 {
 	switch (type)
 	{
 	case cgltf_animation_path_type_translation:
-		return 0.0001f; // 0.1mm linear
+		return 0.0001; // 0.1mm linear
 
 	case cgltf_animation_path_type_rotation:
-		return 0.1f * (3.1415926f / 180.f); // 0.1 degrees
+		return 0.1 * (3.1415926 / 180.0); // 0.1 degrees
 
 	case cgltf_animation_path_type_scale:
-		return 0.001f; // 0.1% ratio
+		return 0.001; // 0.1% ratio
 
 	case cgltf_animation_path_type_weights:
-		return 0.001f; // 0.1% linear
+		return 0.001; // 0.1% linear
 
 	default:
 		assert(!"Uknown animation path");
@@ -51,22 +51,22 @@ static float getDeltaTolerance(cgltf_animation_path_type type)
 	}
 }
 
-static Attr interpolateLinear(const Attr& l, const Attr& r, float t, cgltf_animation_path_type type)
+static Attr interpolateLinear(const Attr& l, const Attr& r, real_t t, cgltf_animation_path_type type)
 {
 	if (type == cgltf_animation_path_type_rotation)
 	{
 		// Approximating slerp, https://zeux.io/2015/07/23/approximating-slerp/
 		// We also handle quaternion double-cover
-		float ca = l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3];
+		real_t ca = l.f[0] * r.f[0] + l.f[1] * r.f[1] + l.f[2] * r.f[2] + l.f[3] * r.f[3];
 
-		float d = fabsf(ca);
-		float A = 1.0904f + d * (-3.2452f + d * (3.55645f - d * 1.43519f));
-		float B = 0.848013f + d * (-1.06021f + d * 0.215638f);
-		float k = A * (t - 0.5f) * (t - 0.5f) + B;
-		float ot = t + t * (t - 0.5f) * (t - 1) * k;
+		real_t d = std::abs(ca);
+		real_t A = 1.0904 + d * (-3.2452 + d * (3.55645 - d * 1.43519));
+		real_t B = 0.848013 + d * (-1.06021 + d * 0.215638);
+		real_t k = A * (t - 0.5) * (t - 0.5) + B;
+		real_t ot = t + t * (t - 0.5) * (t - 1) * k;
 
-		float t0 = 1 - ot;
-		float t1 = ca > 0 ? ot : -ot;
+		real_t t0 = 1 - ot;
+		real_t t1 = ca > 0 ? ot : -ot;
 
 		Attr lerp = {{
 		    l.f[0] * t0 + r.f[0] * t1,
@@ -75,9 +75,9 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, float t, cgltf_anima
 		    l.f[3] * t0 + r.f[3] * t1,
 		}};
 
-		float len = sqrtf(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
+		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
-		if (len > 0.f)
+		if (len > 0.0)
 		{
 			lerp.f[0] /= len;
 			lerp.f[1] /= len;
@@ -100,15 +100,15 @@ static Attr interpolateLinear(const Attr& l, const Attr& r, float t, cgltf_anima
 	}
 }
 
-static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, const Attr& t1, float t, float dt, cgltf_animation_path_type type)
+static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, const Attr& t1, real_t t, real_t dt, cgltf_animation_path_type type)
 {
-	float s0 = 1 + t * t * (2 * t - 3);
-	float s1 = t + t * t * (t - 2);
-	float s2 = 1 - s0;
-	float s3 = t * t * (t - 1);
+	real_t s0 = 1 + t * t * (2 * t - 3);
+	real_t s1 = t + t * t * (t - 2);
+	real_t s2 = 1 - s0;
+	real_t s3 = t * t * (t - 1);
 
-	float ts1 = dt * s1;
-	float ts3 = dt * s3;
+	real_t ts1 = dt * s1;
+	real_t ts3 = dt * s3;
 
 	Attr lerp = {{
 	    s0 * v0.f[0] + ts1 * t0.f[0] + s2 * v1.f[0] + ts3 * t1.f[0],
@@ -119,9 +119,9 @@ static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, c
 
 	if (type == cgltf_animation_path_type_rotation)
 	{
-		float len = sqrtf(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
+		real_t len = std::sqrt(lerp.f[0] * lerp.f[0] + lerp.f[1] * lerp.f[1] + lerp.f[2] * lerp.f[2] + lerp.f[3] * lerp.f[3]);
 
-		if (len > 0.f)
+		if (len > 0.0)
 		{
 			lerp.f[0] /= len;
 			lerp.f[1] /= len;
@@ -133,17 +133,17 @@ static Attr interpolateHermite(const Attr& v0, const Attr& t0, const Attr& v1, c
 	return lerp;
 }
 
-static void resampleKeyframes(std::vector<Attr>& data, const std::vector<float>& input, const std::vector<Attr>& output, cgltf_animation_path_type type, cgltf_interpolation_type interpolation, size_t components, int frames, float mint, int freq)
+static void resampleKeyframes(std::vector<Attr>& data, const std::vector<real_t>& input, const std::vector<Attr>& output, cgltf_animation_path_type type, cgltf_interpolation_type interpolation, size_t components, int frames, real_t mint, int freq)
 {
 	size_t cursor = 0;
 
 	for (int i = 0; i < frames; ++i)
 	{
-		float time = mint + float(i) / freq;
+		real_t time = mint + real_t(i) / freq;
 
 		while (cursor + 1 < input.size())
 		{
-			float next_time = input[cursor + 1];
+			real_t next_time = input[cursor + 1];
 
 			if (next_time > time)
 				break;
@@ -153,12 +153,12 @@ static void resampleKeyframes(std::vector<Attr>& data, const std::vector<float>&
 
 		if (cursor + 1 < input.size())
 		{
-			float cursor_time = input[cursor + 0];
-			float next_time = input[cursor + 1];
+			real_t cursor_time = input[cursor + 0];
+			real_t next_time = input[cursor + 1];
 
-			float range = next_time - cursor_time;
-			float inv_range = (range == 0.f) ? 0.f : 1.f / (next_time - cursor_time);
-			float t = std::max(0.f, std::min(1.f, (time - cursor_time) * inv_range));
+			real_t range = next_time - cursor_time;
+			real_t inv_range = (range == 0.0) ? 0.0 : 1.0 / (next_time - cursor_time);
+			real_t t = std::max(0.0, std::min(1.0, (time - cursor_time) * inv_range));
 
 			for (size_t j = 0; j < components; ++j)
 			{
@@ -207,17 +207,17 @@ static void resampleKeyframes(std::vector<Attr>& data, const std::vector<float>&
 	}
 }
 
-static float getMaxDelta(const std::vector<Attr>& data, cgltf_animation_path_type type, int frames, const Attr* value, size_t components)
+static real_t getMaxDelta(const std::vector<Attr>& data, cgltf_animation_path_type type, int frames, const Attr* value, size_t components)
 {
 	assert(data.size() == frames * components);
 
-	float result = 0;
+	real_t result = 0;
 
 	for (int i = 0; i < frames; ++i)
 	{
 		for (size_t j = 0; j < components; ++j)
 		{
-			float delta = getDelta(value[j], data[i * components + j], type);
+			real_t delta = getDelta(value[j], data[i * components + j], type);
 
 			result = (result < delta) ? delta : result;
 		}
@@ -231,27 +231,27 @@ static void getBaseTransform(Attr* result, size_t components, cgltf_animation_pa
 	switch (type)
 	{
 	case cgltf_animation_path_type_translation:
-		memcpy(result->f, node->translation, 3 * sizeof(float));
+		memcpy(result->f, node->translation, 3 * sizeof(real_t));
 		break;
 
 	case cgltf_animation_path_type_rotation:
-		memcpy(result->f, node->rotation, 4 * sizeof(float));
+		memcpy(result->f, node->rotation, 4 * sizeof(real_t));
 		break;
 
 	case cgltf_animation_path_type_scale:
-		memcpy(result->f, node->scale, 3 * sizeof(float));
+		memcpy(result->f, node->scale, 3 * sizeof(real_t));
 		break;
 
 	case cgltf_animation_path_type_weights:
 		if (node->weights_count)
 		{
 			assert(node->weights_count == components);
-			memcpy(result->f, node->weights, components * sizeof(float));
+			memcpy(result->f, node->weights, components * sizeof(real_t));
 		}
 		else if (node->mesh && node->mesh->weights_count)
 		{
 			assert(node->mesh->weights_count == components);
-			memcpy(result->f, node->mesh->weights, components * sizeof(float));
+			memcpy(result->f, node->mesh->weights, components * sizeof(real_t));
 		}
 		break;
 
@@ -260,23 +260,23 @@ static void getBaseTransform(Attr* result, size_t components, cgltf_animation_pa
 	}
 }
 
-static float getWorldScale(cgltf_node* node)
+static real_t getWorldScale(cgltf_node* node)
 {
-	float transform[16];
+	real_t transform[16];
 	cgltf_node_transform_world(node, transform);
 
 	// 3x3 determinant computes scale^3
-	float a0 = transform[5] * transform[10] - transform[6] * transform[9];
-	float a1 = transform[4] * transform[10] - transform[6] * transform[8];
-	float a2 = transform[4] * transform[9] - transform[5] * transform[8];
-	float det = transform[0] * a0 - transform[1] * a1 + transform[2] * a2;
+	real_t a0 = transform[5] * transform[10] - transform[6] * transform[9];
+	real_t a1 = transform[4] * transform[10] - transform[6] * transform[8];
+	real_t a2 = transform[4] * transform[9] - transform[5] * transform[8];
+	real_t det = transform[0] * a0 - transform[1] * a1 + transform[2] * a2;
 
-	return powf(fabsf(det), 1.f / 3.f);
+	return powf(std::abs(det), 1.0 / 3.0);
 }
 
 void processAnimation(Animation& animation, const Settings& settings)
 {
-	float mint = FLT_MAX, maxt = 0;
+	real_t mint = REAL_MAX, maxt = 0;
 
 	for (size_t i = 0; i < animation.tracks.size(); ++i)
 	{
@@ -309,16 +309,16 @@ void processAnimation(Animation& animation, const Settings& settings)
 		track.time.clear();
 		track.data.swap(result);
 
-		float tolerance = getDeltaTolerance(track.path);
+		real_t tolerance = getDeltaTolerance(track.path);
 
 		// translation tracks use world space tolerance; in the future, we should compute all errors as linear using hierarchy
 		if (track.node && track.path == cgltf_animation_path_type_translation)
 		{
-			float scale = getWorldScale(track.node);
-			tolerance /= scale == 0.f ? 1.f : scale;
+			real_t scale = getWorldScale(track.node);
+			tolerance /= scale == 0.0 ? 1.0 : scale;
 		}
 
-		float deviation = getMaxDelta(track.data, track.path, frames, &track.data[0], track.components);
+		real_t deviation = getMaxDelta(track.data, track.path, frames, &track.data[0], track.components);
 
 		if (deviation <= tolerance)
 		{
