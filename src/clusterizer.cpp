@@ -515,7 +515,7 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 	{
 		datatype_t best_triangle = ALL_BITS_ONE;
 		datatype_t best_extra = 5;
-		real_t best_score = std::numeric_limits<real_t>::max();
+		real_t best_score = REAL_MAX;
 
 		Cone meshlet_cone = getMeshletCone(meshlet_cone_acc, meshlet.triangle_count);
 
@@ -576,7 +576,7 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, datatype_t* meshlet_vert
 		{
 			real_t position[3] = {meshlet_cone.px, meshlet_cone.py, meshlet_cone.pz};
 			datatype_t index = ALL_BITS_ONE;
-			real_t limit = std::numeric_limits<real_t>::max();
+			real_t limit = REAL_MAX;
 
 			kdtreeNearest(nodes, 0, &triangles[0].px, sizeof(Cone) / sizeof(real_t), emitted_flags, position, index, limit);
 

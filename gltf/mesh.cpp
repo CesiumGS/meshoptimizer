@@ -373,7 +373,7 @@ void filterEmptyMeshes(std::vector<Mesh>& meshes)
 
 static bool hasColors(const std::vector<Attr>& data)
 {
-	const real_t threshold = 0.99f;
+	const real_t threshold = 0.99;
 
 	for (size_t i = 0; i < data.size(); ++i)
 	{
@@ -388,7 +388,7 @@ static bool hasColors(const std::vector<Attr>& data)
 
 static bool hasDeltas(const std::vector<Attr>& data)
 {
-	const real_t threshold = 0.01f;
+	const real_t threshold = 0.01;
 
 	for (size_t i = 0; i < data.size(); ++i)
 	{

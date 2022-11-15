@@ -16,8 +16,8 @@ struct Bounds
 
 	Bounds()
 	{
-		min.f[0] = min.f[1] = min.f[2] = min.f[3] = + REAL_MAX;
-		max.f[0] = max.f[1] = max.f[2] = max.f[3] = - REAL_MAX;
+		min.f[0] = min.f[1] = min.f[2] = min.f[3] = +REAL_MAX;
+		max.f[0] = max.f[1] = max.f[2] = max.f[3] = -REAL_MAX;
 	}
 
 	bool isValid() const

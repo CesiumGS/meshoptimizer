@@ -293,7 +293,7 @@ std::vector<State> gen0(size_t count, const std::vector<Mesh>& meshes)
 
 // https://en.wikipedia.org/wiki/Differential_evolution
 // Good Parameters for Differential Evolution. Magnus Erik Hvass Pedersen, 2010
-std::pair<State, real_t> genN(std::vector<State>& seed, const std::vector<Mesh>& meshes, real_t crossover = 0.8803f, real_t weight = 0.4717f)
+std::pair<State, real_t> genN(std::vector<State>& seed, const std::vector<Mesh>& meshes, real_t crossover = 0.8803, real_t weight = 0.4717)
 {
 	std::vector<State> result(seed.size());
 

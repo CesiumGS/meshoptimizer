@@ -343,7 +343,8 @@ size_t meshopt_encodeIndexBufferBound(size_t index_count, size_t vertex_count)
 	// compute number of bits required for each index
 	datatype_t vertex_bits = 1;
 
-	while (vertex_bits < 32 && vertex_count > size_t(1) << vertex_bits)
+	// betto: is this change (32 --> NUM_BITS) correct?
+	while (vertex_bits < NUM_BITS && vertex_count > size_t(1) << vertex_bits)
 		vertex_bits++;
 
 	// worst-case encoding is 2 header bytes + 3 varint-7 encoded index deltas
@@ -606,7 +607,8 @@ size_t meshopt_encodeIndexSequenceBound(size_t index_count, size_t vertex_count)
 	// compute number of bits required for each index
 	datatype_t vertex_bits = 1;
 
-	while (vertex_bits < 32 && vertex_count > size_t(1) << vertex_bits)
+	// betto: is this change (32 --> NUM_BITS) correct?
+	while (vertex_bits < NUM_BITS && vertex_count > size_t(1) << vertex_bits)
 		vertex_bits++;
 
 	// worst-case encoding is 1 varint-7 encoded index delta for a K bit value and an extra bit

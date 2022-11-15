@@ -21,14 +21,14 @@ struct VertexScoreTable
 
 // Tuned to minimize the ACMR of a GPU that has a cache profile similar to NVidia and AMD
 static const VertexScoreTable kVertexScoreTable = {
-    {0.0, 0.779f, 0.791f, 0.789f, 0.981f, 0.843f, 0.726f, 0.847f, 0.882f, 0.867f, 0.799f, 0.642f, 0.613f, 0.600f, 0.568f, 0.372f, 0.234f},
-    {0.0, 0.995f, 0.713f, 0.450f, 0.404f, 0.059f, 0.005f, 0.147f, 0.006f},
+    {0.0, 0.779, 0.791, 0.789, 0.981, 0.843, 0.726, 0.847, 0.882, 0.867, 0.799, 0.642, 0.613, 0.600, 0.568, 0.372, 0.234},
+    {0.0, 0.995, 0.713, 0.450, 0.404, 0.059, 0.005, 0.147, 0.006},
 };
 
 // Tuned to minimize the encoded index buffer size
 static const VertexScoreTable kVertexScoreTableStrip = {
-    {0.0, 1.000f, 1.000f, 1.000f, 0.453f, 0.561f, 0.490f, 0.459f, 0.179f, 0.526f, 0.000f, 0.227f, 0.184f, 0.490f, 0.112f, 0.050f, 0.131f},
-    {0.0, 0.956f, 0.786f, 0.577f, 0.558f, 0.618f, 0.549f, 0.499f, 0.489f},
+    {0.0, 1.000, 1.000, 1.000, 0.453, 0.561, 0.490, 0.459, 0.179, 0.526, 0.000, 0.227, 0.184, 0.490, 0.112, 0.050, 0.131},
+    {0.0, 0.956, 0.786, 0.577, 0.558, 0.618, 0.549, 0.499, 0.489},
 };
 
 struct TriangleAdjacency
